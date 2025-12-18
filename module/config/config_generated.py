@@ -536,15 +536,5 @@ class GeneratedConfig:
     # Group `GameManager`
     GameManager_AutoRestart = True
 
-    # Group `VLMGameController`
-    VLMGameController_Enable = False
-    VLMGameController_Provider = 'openai'  # openai, claude, gemini
-    VLMGameController_Model = 'gpt-4o-mini'
-    VLMGameController_APIKey = ''
-    VLMGameController_BaseURL = ''
-    VLMGameController_MaxRecoveryAttempts = 3  # 1, 2, 3, 5
-    VLMGameController_Timeout = 30  # 15, 30, 60
-    VLMGameController_EnableActionLogging = True
-
     # Group `Storage`
     Storage_Storage = {}

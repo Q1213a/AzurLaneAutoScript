@@ -907,36 +907,3 @@ AzurLaneUncensored:
     display: disabled
 GameManager:
   AutoRestart: true
-
-# ==================== VLM Game Controller ====================
-# VLM (视觉语言模型) 智能游戏控制器
-# 使用 AI 视觉分析自动处理游戏卡死/错误界面，避免简单重启
-
-VLMGameController:
-  Enable:
-    type: checkbox
-    value: false
-    option: [false, true]
-  Provider:
-    value: openai
-    option: [openai, claude, gemini]
-  Model:
-    value: gpt-4o-mini
-    type: input
-  APIKey:
-    value: ""
-    type: input
-  BaseURL:
-    value: ""
-    type: input
-    display: hide
-  MaxRecoveryAttempts:
-    value: 3
-    option: [1, 2, 3, 5]
-  Timeout:
-    value: 30
-    option: [15, 30, 60]
-  EnableActionLogging:
-    type: checkbox
-    value: true
-    option: [false, true]
