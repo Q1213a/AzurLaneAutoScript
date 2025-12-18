@@ -5,6 +5,7 @@ import re
 import argparse
 import json
 import queue
+import requests
 import threading
 import time
 import re
@@ -2060,40 +2061,41 @@ class AlasGUI(Frame):
         )
 
         # Announcement check feature
-        # Fetches announcement from API on page load and every 5 minutes
-        # Only shows if announcementId hasn't been shown before (stored in localStorage)
+        # JavaScript function to show announcement modal (called from backend)
         run_js(
             '''
         (function(){
-            var ANNOUNCEMENT_API = 'https://ep.nekro.ai/e/wess09/alas/api/a1';
             var STORAGE_KEY = 'alas_shown_announcements';
-            var CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutes in milliseconds
 
-            function getShownAnnouncements() {
+            window.alasGetShownAnnouncements = function() {
                 try {
                     var stored = localStorage.getItem(STORAGE_KEY);
                     return stored ? JSON.parse(stored) : [];
                 } catch (e) {
                     return [];
                 }
-            }
+            };
 
-            function markAnnouncementShown(announcementId) {
+            window.alasMarkAnnouncementShown = function(announcementId) {
                 try {
-                    var shown = getShownAnnouncements();
+                    var shown = window.alasGetShownAnnouncements();
                     if (shown.indexOf(announcementId) === -1) {
                         shown.push(announcementId);
                         localStorage.setItem(STORAGE_KEY, JSON.stringify(shown));
                     }
                 } catch (e) {}
-            }
+            };
 
-            function hasBeenShown(announcementId) {
-                var shown = getShownAnnouncements();
+            window.alasHasBeenShown = function(announcementId) {
+                var shown = window.alasGetShownAnnouncements();
                 return shown.indexOf(announcementId) !== -1;
-            }
+            };
 
-            function showAnnouncementModal(title, content, announcementId) {
+            window.alasShowAnnouncement = function(title, content, announcementId) {
+                if (window.alasHasBeenShown(announcementId)) {
+                    return;
+                }
+
                 // Create modal overlay
                 var overlay = document.createElement('div');
                 overlay.id = 'alas-announcement-modal';
@@ -2120,7 +2122,7 @@ class AlasGUI(Frame):
                 closeBtn.onmouseover = function(){ closeBtn.style.opacity = '0.9'; };
                 closeBtn.onmouseout = function(){ closeBtn.style.opacity = '1'; };
                 closeBtn.onclick = function(){
-                    markAnnouncementShown(announcementId);
+                    window.alasMarkAnnouncementShown(announcementId);
                     overlay.remove();
                 };
 
@@ -2132,7 +2134,7 @@ class AlasGUI(Frame):
                 // Close on overlay click
                 overlay.onclick = function(e){
                     if (e.target === overlay) {
-                        markAnnouncementShown(announcementId);
+                        window.alasMarkAnnouncementShown(announcementId);
                         overlay.remove();
                     }
                 };
@@ -2150,34 +2152,41 @@ class AlasGUI(Frame):
                         contentEl.style.color = '#b2bec3';
                     }
                 } catch (e) {}
-            }
-
-            function checkAnnouncement() {
-                fetch(ANNOUNCEMENT_API)
-                    .then(function(response) {
-                        if (!response.ok) throw new Error('Network response was not ok');
-                        return response.json();
-                    })
-                    .then(function(data) {
-                        if (data && data.announcementId && data.title && data.content) {
-                            if (!hasBeenShown(data.announcementId)) {
-                                showAnnouncementModal(data.title, data.content, data.announcementId);
-                            }
-                        }
-                    })
-                    .catch(function(error) {
-                        console.log('Announcement check failed:', error);
-                    });
-            }
-
-            // Check on page load (with small delay to ensure page is ready)
-            setTimeout(checkAnnouncement, 2000);
-
-            // Check every 5 minutes
-            setInterval(checkAnnouncement, CHECK_INTERVAL);
+            };
         })();
         '''
         )
+
+        # Announcement check function - fetches from backend and pushes to frontend
+        def check_and_push_announcement():
+            try:
+                resp = requests.get(
+                    'https://ep.nekro.ai/e/wess09/alas/api/a1',
+                    timeout=10
+                )
+                if resp.status_code == 200:
+                    data = resp.json()
+                    if data and data.get('announcementId') and data.get('title') and data.get('content'):
+                        announcement_id = data['announcementId']
+                        title = data['title'].replace("'", "\\'").replace('\n', '\\n')
+                        content = data['content'].replace("'", "\\'").replace('\n', '\\n')
+                        run_js(f"window.alasShowAnnouncement('{title}', '{content}', '{announcement_id}');")
+            except Exception as e:
+                logger.debug(f"Announcement check failed: {e}")
+
+        # Periodic announcement check generator
+        def announcement_checker():
+            yield  # Initial yield to register with task handler
+            # Initial check after 2 seconds
+            time.sleep(2)
+            check_and_push_announcement()
+            yield
+            while True:
+                check_and_push_announcement()
+                yield
+
+        # Add announcement checker task (runs every 5 minutes = 300 seconds)
+        self.task_handler.add(announcement_checker(), delay=300, pending_delete=True)
 
         aside = get_localstorage("aside")
         self.show()
