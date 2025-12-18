@@ -340,8 +340,10 @@ class OperationSiren(OSMap):
             return
             
         # 检查是否配置了推送
-        if not self.config.Error_OnePushConfig:
-            logger.warning("推送配置未设置，跳过推送")
+        # 默认值是 'provider: null'，需要检查 provider 是否有效
+        push_config = self.config.Error_OnePushConfig
+        if not push_config or 'provider: null' in push_config or 'provider:null' in push_config:
+            logger.warning("推送配置未设置或 provider 为 null，跳过推送。请在 Alas 设置 -> 错误处理 -> OnePush 配置中设置有效的推送渠道。")
             return
             
         # 导入并调用推送通知模块
@@ -416,14 +418,14 @@ class OperationSiren(OSMap):
                     direction = "降至"
                 
                 self.notify_push(
-                    title="行动力阈值变化",
+                    title="[Alas] 行动力阈值变化",
                     content=f"行动力{direction}{current_threshold}+ (当前: {current_ap})"
                 )
             elif self._last_notified_ap_threshold is not None:
                 # 降到最低阈值以下
                 lowest = min(thresholds)
                 self.notify_push(
-                    title="行动力阈值变化", 
+                    title="[Alas] 行动力阈值变化", 
                     content=f"行动力降至{lowest}以下 (当前: {current_ap})"
                 )
             
@@ -497,7 +499,7 @@ class OperationSiren(OSMap):
                         
                         # 推送通知
                         self.notify_push(
-                            title="短猫相接 - 行动力不足",
+                            title="[Alas] 短猫相接 - 行动力不足",
                             content=f"当前行动力 {self._action_point_total} 不足 (需要 {self.config.OpsiMeowfficerFarming_ActionPointPreserve})，推迟1小时并切换回侵蚀1"
                         )
                         
@@ -628,7 +630,7 @@ class OperationSiren(OSMap):
                         logger.warning(f'行动力不足以执行短猫 ({self._action_point_total} < {self.config.OpsiMeowfficerFarming_ActionPointPreserve})')
                         
                         self.notify_push(
-                            title="侵蚀1 - 黄币与行动力双重不足",
+                            title="[Alas] 侵蚀1 - 黄币与行动力双重不足",
                             content=f"黄币 {yellow_coins} 不足，但行动力 {self._action_point_total} 也不足以执行短猫 (需要 {self.config.OpsiMeowfficerFarming_ActionPointPreserve})，推迟1小时"
                         )
                         
@@ -672,7 +674,7 @@ class OperationSiren(OSMap):
                     logger.warning(f'【智能调度】行动力低于最低保留 ({self._action_point_total} < {min_reserve})')
                     
                     self.notify_push(
-                        title="侵蚀1 - 行动力低于最低保留",
+                        title="[Alas] 侵蚀1 - 行动力低于最低保留",
                         content=f"当前行动力 {self._action_point_total} 低于最低保留 {min_reserve}，推迟1小时"
                     )
                     
