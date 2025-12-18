@@ -2795,7 +2795,7 @@
     "YellowCoinPreserve": {
       "name": "保留x点黄币",
       "help": "雪风大人温馨提示：低于此设置的黄币数量将不会运行侵蚀一nanoda!"
-    },    
+    },
     "SirenResearch_Enable": {
       "name": "塞壬研究装置",
       "help": "雪风大人提醒：消耗紫币换黄币，一个月没有几十万海里慎用nanoda!"
@@ -3037,6 +3037,47 @@
       "Clear": "Clear",
       "EnterPassword": "Enter password",
       "ChooseFile": "Choose file"
+    }
+  },
+  "VLMGameController": {
+    "_info": {
+      "name": "VLM Game Controller",
+      "help": "Use Vision-Language Model to automatically handle game stuck/unknown pages, avoid simple restart"
+    },
+    "Enable": {
+      "name": "Enable VLM Controller",
+      "help": "Will fallback to traditional restart if VLM fails"
+    },
+    "Provider": {
+      "name": "VLM Provider",
+      "help": "Select VLM API provider",
+      "openai": "OpenAI (GPT-4o series)",
+      "claude": "Anthropic (Claude 3.5)",
+      "gemini": "Google (Gemini)"
+    },
+    "Model": {
+      "name": "Model Name",
+      "help": "e.g. gpt-4o, gpt-4o-mini, claude-3-5-sonnet-20241022, gemini-2.0-flash-exp"
+    },
+    "APIKey": {
+      "name": "API Key",
+      "help": "Get from corresponding platform"
+    },
+    "BaseURL": {
+      "name": "Custom API URL",
+      "help": "Leave empty for official URL, can set proxy URL"
+    },
+    "MaxRecoveryAttempts": {
+      "name": "Max Recovery Attempts",
+      "help": "Max VLM recovery attempts for single error"
+    },
+    "Timeout": {
+      "name": "API Timeout (seconds)",
+      "help": "Timeout for VLM API calls"
+    },
+    "EnableActionLogging": {
+      "name": "Enable Action Logging",
+      "help": "Log VLM action sequences for debugging"
     }
   }
 }

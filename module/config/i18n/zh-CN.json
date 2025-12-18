@@ -2795,7 +2795,7 @@
     "YellowCoinPreserve": {
       "name": "保留x点黄币",
       "help": "雪风大人温馨提示：低于此设置的黄币数量将不会运行侵蚀一nanoda!"
-    },     
+    },
     "SirenResearch_Enable": {
       "name": "塞壬研究装置",
       "help": "雪风大人提醒：消耗紫币换黄币，一个月没有几十万海里慎用nanoda!"
@@ -2807,7 +2807,7 @@
     "ExecuteFixedPatrolScan": {
       "name": "舰队强制移动",
       "help": "雪风大人温馨提示：开启后，将强制移动舰队以免找不到明石，指挥官你也不想因为找不到明石导致坠机nanoda？打开这个功能轻轻松松达到50万海里每月nanoda，指挥官还在等什么nanoda!"
-    },      
+    },
     "Cl1Filter": {
       "name": "明石购买筛选",
       "help": "侵蚀一明石一般只购买体力nanoda,ActionPoint > PurpleCoins为购买紫币nanoda"
@@ -3052,6 +3052,47 @@
       "Clear": "清除",
       "EnterPassword": "输入密码",
       "ChooseFile": "选择文件"
+    }
+  },
+  "VLMGameController": {
+    "_info": {
+      "name": "VLM智能控制器",
+      "help": "使用视觉语言模型（AI视觉）自动处理游戏卡死和未知界面，避免简单重启"
+    },
+    "Enable": {
+      "name": "启用VLM控制器",
+      "help": "VLM失败时会自动降级到传统重启策略"
+    },
+    "Provider": {
+      "name": "VLM提供商",
+      "help": "选择使用的VLM API提供商",
+      "openai": "OpenAI (GPT-4o系列)",
+      "claude": "Anthropic (Claude 3.5)",
+      "gemini": "Google (Gemini)"
+    },
+    "Model": {
+      "name": "模型名称",
+      "help": "如 gpt-4o、gpt-4o-mini、claude-3-5-sonnet-20241022、gemini-2.0-flash-exp"
+    },
+    "APIKey": {
+      "name": "API密钥",
+      "help": "从对应平台获取的API Key"
+    },
+    "BaseURL": {
+      "name": "自定义API地址",
+      "help": "留空使用官方地址，可填代理地址"
+    },
+    "MaxRecoveryAttempts": {
+      "name": "最大恢复尝试次数",
+      "help": "单个错误最多尝试几次VLM恢复"
+    },
+    "Timeout": {
+      "name": "API超时时间(秒)",
+      "help": "VLM API调用的超时时间"
+    },
+    "EnableActionLogging": {
+      "name": "启用操作日志",
+      "help": "记录VLM的操作序列，便于调试"
     }
   }
 }
