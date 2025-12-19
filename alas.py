@@ -140,6 +140,14 @@ class AzurLaneAutoScript:
     #         exit(1)
 
     def run(self, command, skip_first_screenshot=False):
+        """
+        Run a task command.
+        
+        Returns:
+            True: Task completed successfully
+            False: Task failed with unrecoverable error (counts toward failure limit)
+            'recoverable': Task failed with recoverable error (does NOT count toward failure limit)
+        """
         try:
             if not skip_first_screenshot:
                 self.device.screenshot()
@@ -148,25 +156,28 @@ class AzurLaneAutoScript:
         except TaskEnd:
             return True
         except GameNotRunningError as e:
+            # 可恢复错误：游戏未运行，重启即可
             logger.warning(e)
             self.config.task_call('Restart')
-            return False
+            return 'recoverable'
         except (GameStuckError, GameTooManyClickError) as e:
+            # 可恢复错误：游戏卡住或点击过多，重启即可
             logger.error(e)
             self.save_error_log()
             logger.warning(f'Game stuck, {self.device.package} will be restarted in 10 seconds')
             logger.warning('If you are playing by hand, please stop Alas')
             self.config.task_call('Restart')
             self.device.sleep(10)
-            return False
+            return 'recoverable'
         except GameBugError as e:
+            # 可恢复错误：游戏客户端 bug，重启即可
             logger.warning(e)
             self.save_error_log()
             logger.warning('An error has occurred in Azur Lane game client, Alas is unable to handle')
             logger.warning(f'Restarting {self.device.package} to fix it')
             self.config.task_call('Restart')
             self.device.sleep(10)
-            return False
+            return 'recoverable'
         except GamePageUnknownError:
             logger.info('Game server may be under maintenance or network may be broken, check server status now')
             self.checker.check_now()
@@ -723,8 +734,16 @@ class AzurLaneAutoScript:
 
                 # Check failures
                 # @ 单个任务连续失败三次终止程序
+                # 注意：可恢复错误 (success == 'recoverable') 不计入失败次数
                 failed = deep_get(self.failure_record, keys=task, default=0)
-                failed = 0 if success else failed + 1
+                if success == True:
+                    failed = 0  # 成功，重置计数
+                elif success == 'recoverable':
+                    # 可恢复错误（如 GameStuckError），不增加失败计数
+                    # 但也不重置，保持之前的计数
+                    logger.info(f'Task `{task}` encountered a recoverable error, not counting toward failure limit')
+                else:
+                    failed = failed + 1  # 不可恢复错误，增加计数
                 deep_set(self.failure_record, keys=task, value=failed)
                 if failed >= 3:
                     logger.critical(f"Task `{task}` failed 3 or more times.")
@@ -740,10 +759,11 @@ class AzurLaneAutoScript:
                     )
                     exit(1)
 
-                if success:
+                if success == True:
                     del_cached_property(self, 'config')
                     continue
-                elif self.config.Error_HandleError:
+                elif success == 'recoverable' or self.config.Error_HandleError:
+                    # 可恢复错误或启用了错误处理，继续循环
                     # self.config.task_delay(success=False)
                     del_cached_property(self, 'config')
                     self.checker.check_now()
