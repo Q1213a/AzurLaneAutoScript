@@ -108,12 +108,12 @@ task_handler = TaskHandler()
 
 def timedelta_to_text(delta=None):
     time_delta_name_suffix_dict = {
-        'Y': 'LongTimeAgo',
+        'Y': 'YearsAgo',
         'M': 'MonthsAgo',
         'D': 'DaysAgo',
         'h': 'HoursAgo',
         'm': 'MinutesAgo',
-        's': 'JustNow',
+        's': 'SecondsAgo',
     }
     time_delta_name_prefix = 'Gui.Dashboard.'
     time_delta_name_suffix = 'NoData'
@@ -126,10 +126,7 @@ def timedelta_to_text(delta=None):
                 break
     time_delta_display = str(time_delta_display)
     time_delta_name = time_delta_name_prefix + time_delta_name_suffix
-    if time_delta_name_suffix in ['JustNow', 'NoData', 'LongTimeAgo']:
-        return t(time_delta_name)
-    else:
-        return time_delta_display + t(time_delta_name)
+    return time_delta_display + t(time_delta_name)
 
 
 class AlasGUI(Frame):
