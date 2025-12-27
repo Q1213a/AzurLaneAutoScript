@@ -42,6 +42,9 @@ class LogRes:
             logger.info('No such resource on dashboard')
             super().__setattr__(name=key, value=value)
 
+    def group(self, name):
+        return deep_get(self.config.data, f'Dashboard.{name}')
+
     @cached_property
     def groups(self) -> dict:
         from module.config.utils import read_file, filepath_argument
