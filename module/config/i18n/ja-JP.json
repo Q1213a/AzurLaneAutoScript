@@ -3013,10 +3013,12 @@
     "Dashboard": {
       "TimeError": "Time error",
       "JustNow": "Just now",
+      "SecondsAgo": "秒前",
       "MinutesAgo": "Minutes ago",
       "HoursAgo": "Hours ago",
       "DaysAgo": "Days ago",
       "MonthsAgo": "Months ago",
+      "YearsAgo": "年前",
       "LongTimeAgo": "Long time ago",
       "NoData": "No data",
       "Oil": "Oil",
