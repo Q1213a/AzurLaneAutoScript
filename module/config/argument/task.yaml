@@ -324,8 +324,6 @@ Opsi:
       - Scheduler
       - OpsiMeowfficerFarming
       - OpsiFleet
-      - OpsiCheckLeveling
-      - OpsiScheduling
     OpsiHazard1Leveling:
       - Scheduler
       - OpsiHazard1Leveling

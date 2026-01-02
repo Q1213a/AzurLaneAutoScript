@@ -392,7 +392,7 @@ class OperationSiren(OSMap):
             - 行动力从 1200 降至 900，会推送"降至1000以下"
         """
         # 检查是否启用智能调度
-        if not self.config.OpsiScheduling_EnableSmartScheduling:
+        if not getattr(self.config, 'OpsiScheduling_EnableSmartScheduling', False):
             return
             
         # 初始化上次通知的阈值记录（首次调用时为 None）
@@ -404,7 +404,8 @@ class OperationSiren(OSMap):
         
         # 解析配置的阈值列表
         try:
-            thresholds = [int(x.strip()) for x in self.config.OpsiScheduling_ActionPointNotifyLevels.split(',')]
+            levels_str = getattr(self.config, 'OpsiScheduling_ActionPointNotifyLevels', '500, 1000, 2000, 3000')
+            thresholds = [int(x.strip()) for x in levels_str.split(',')]
         except Exception as e:
             logger.warning(f"解析行动力阈值配置失败: {e}")
             return
@@ -505,7 +506,8 @@ class OperationSiren(OSMap):
                 
                 # ===== 智能调度: 短猫相接行动力不足检查 =====
                 # 检查当前行动力是否低于配置的保留值
-                if self.config.OpsiScheduling_EnableSmartScheduling:
+                if getattr(self.config, 'OpsiScheduling_EnableSmartScheduling', False):
+
                     if self._action_point_total < self.config.OpsiMeowfficerFarming_ActionPointPreserve:
                         logger.info(f'【智能调度】短猫相接行动力不足 ({self._action_point_total} < {self.config.OpsiMeowfficerFarming_ActionPointPreserve})')
                         
@@ -706,7 +708,7 @@ class OperationSiren(OSMap):
             
             # ===== 智能调度: 最低行动力保留检查 =====
             # 检查当前行动力是否低于最低保留值
-            if self.config.OpsiScheduling_EnableSmartScheduling:
+            if getattr(self.config, 'OpsiScheduling_EnableSmartScheduling', False):
                 min_reserve = self.config.OpsiHazard1Leveling_MinimumActionPointReserve
                 if self._action_point_total < min_reserve:
                     logger.warning(f'【智能调度】行动力低于最低保留 ({self._action_point_total} < {min_reserve})')

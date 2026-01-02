@@ -9484,32 +9484,6 @@
         "value": false
       }
     },
-    "OpsiCheckLeveling": {
-      "TargetLevel": {
-        "type": "input",
-        "value": 0
-      },
-      "LastRun": {
-        "type": "datetime",
-        "value": "2020-01-01 00:00:00",
-        "validate": "datetime"
-      },
-      "DelayAfterFull": {
-        "type": "checkbox",
-        "value": false
-      }
-    },
-    "OpsiScheduling": {
-      "EnableSmartScheduling": {
-        "type": "checkbox",
-        "value": false
-      },
-      "ActionPointNotifyLevels": {
-        "type": "input",
-        "value": "500,1000,2000,3000",
-        "valuetype": "str"
-      }
-    },
     "Storage": {
       "Storage": {
         "type": "storage",
