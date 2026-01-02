@@ -1409,9 +1409,31 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
             self.zone_init()
 
             self.run_auto_search(question=True, rescan='full', after_auto_search=True)
+            
+            # 发送成功通知
+            try:
+                if hasattr(self, 'notify_push'):
+                    zone_type_text = "安全海域" if siren_bug_type == 'safe' else "普通海域"
+                    self.notify_push(
+                        title="[Alas] 塞壬Bug利用 - 完成",
+                        content=f"已完成塞壬研究装置Bug利用\\n目标区域: {target_zone} ({zone_type_text})\\n已返回侵蚀一区域"
+                    )
+            except Exception as notify_err:
+                logger.debug(f'发送成功通知失败: {notify_err}')
 
         except Exception as e:
             logger.error(f'塞壬研究装置BUG利用失败: {e}', exc_info=True)
+            
+            # 发送失败通知
+            try:
+                if hasattr(self, 'notify_push'):
+                    self.notify_push(
+                        title="[Alas] 塞壬Bug利用 - 失败",
+                        content=f"塞壬研究装置Bug利用失败\\n错误: {str(e)}\\n尝试返回侵蚀一区域"
+                    )
+            except Exception as notify_err:
+                logger.debug(f'发送失败通知失败: {notify_err}')
+            
             # 异常时强制返回侵蚀一区域
             try:
                 self.os_map_goto_globe(unpin=False)
