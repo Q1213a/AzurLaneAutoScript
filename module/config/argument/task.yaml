@@ -360,7 +360,7 @@ Tool:
 Dashboard:
   page: "dashboard"
   tasks:
-    Resource:
+    Dashboard:
       - Oil
       - Coin
       - Gem
