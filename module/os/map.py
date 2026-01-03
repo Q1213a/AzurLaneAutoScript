@@ -1400,19 +1400,41 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
                         with self.config.temporary(STORY_ALLOW_SKIP=False):
                             self._solved_map_event.add('is_scanning_device')
 
-                            # 第2个选项
-                            if self._select_story_option_by_index(target_index=1, options_count=3):      
-                                self._click_story_confirm_button()
-                            # 第2个选项
-                            time.sleep(0.8)
-                            if self._select_story_option_by_index(target_index=1, options_count=3):      
-                                self._click_story_confirm_button()
-                            # 第3个选项
-                            time.sleep(0.8)
-                            if self._select_story_option_by_index(target_index=2, options_count=3):      
-                                self._click_story_confirm_button()
+                            # 第1次：选择第2个选项
+                            logger.info('[Bug利用] 等待第1组选项（选择第2个）')
+                            time.sleep(1.5)
+                            if self._select_story_option_by_index(target_index=1, options_count=3):
+                                logger.info('[Bug利用] 第1组选项点击成功')
+                                time.sleep(0.5)
+                                if self._click_story_confirm_button():
+                                    logger.info('[Bug利用] 第1组确认成功')
+                            else:
+                                logger.warning('[Bug利用] 第1组选项点击失败')
+                            
+                            # 第2次：选择第2个选项
+                            logger.info('[Bug利用] 等待第2组选项（选择第2个）')
+                            time.sleep(2.0)
+                            if self._select_story_option_by_index(target_index=1, options_count=3):
+                                logger.info('[Bug利用] 第2组选项点击成功')
+                                time.sleep(0.5)
+                                if self._click_story_confirm_button():
+                                    logger.info('[Bug利用] 第2组确认成功')
+                            else:
+                                logger.warning('[Bug利用] 第2组选项点击失败')
+                            
+                            # 第3次：选择第3个选项
+                            logger.info('[Bug利用] 等待第3组选项（选择第3个）')
+                            time.sleep(2.0)
+                            if self._select_story_option_by_index(target_index=2, options_count=3):
+                                logger.info('[Bug利用] 第3组选项点击成功')
+                                time.sleep(0.5)
+                                if self._click_story_confirm_button():
+                                    logger.info('[Bug利用] 第3组确认成功')
+                            else:
+                                logger.warning('[Bug利用] 第3组选项点击失败')
 
                             device_handled = True
+                            logger.info('[Bug利用] 所有选项处理完成')
                     time.sleep(0.5)
 
                 if not device_handled:
