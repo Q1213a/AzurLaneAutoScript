@@ -1948,6 +1948,7 @@ class AlasGUI(Frame):
             Alas is a free open source software, if you paid for Alas from any channel, please refund.
             Alas 是一款免费开源软件，如果你在任何渠道付费购买了Alas，请退款。
             Project repository 项目地址：`https://github.com/LmeSzinc/AzurLaneAutoScript`
+            禁止在 Alas官方仓库 Alas官方群 Alas官方社区 提及本分支！
             """
             ).style("text-align: center")
 
