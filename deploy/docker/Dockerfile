@@ -13,7 +13,6 @@ RUN apt update \
     && git config --global --add safe.directory '*' \
     && pip install --upgrade pip \
     && pip install "cython<3" \
-    && pip install --no-build-isolation av==10.0.0 \
     && pip install -r /tmp/requirements.txt \
     && python -c "import mxnet; import cnocr; print('OCR dependencies loaded successfully')" \
     && rm /tmp/requirements.txt \
