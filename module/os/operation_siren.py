@@ -622,7 +622,7 @@ class OperationSiren(OSMap):
                 # When not running CL1 and use oil
                 keep_current_ap = True
                 check_rest_ap = True
-                if self.is_cl1_enabled and self.get_yellow_coins() >= self.config.OpsiHazard1Leveling_YellowCoinPreserve:
+                if self.is_cl1_enabled and self.get_yellow_coins() >= self.config.OpsiHazard1Leveling_OperationCoinsPreserve:
                     check_rest_ap = False
                 if not self.is_cl1_enabled and self.config.OpsiGeneral_BuyActionPointLimit > 0:
                     keep_current_ap = False
