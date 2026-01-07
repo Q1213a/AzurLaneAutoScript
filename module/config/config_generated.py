@@ -599,7 +599,7 @@ class GeneratedConfig:
     OpsiGeneral_UseRepairPack = False
     OpsiGeneral_RepairPackThreshold = 0.9
     OpsiGeneral_DoRandomMapEvent = True
-    OpsiGeneral_AkashiShopFilter = 'ActionPoint > PurpleCoins'
+    OpsiGeneral_AkashiShopFilter = 'ActionPoint'
 
     # Group `OpsiAshBeacon`
     OpsiAshBeacon_AttackMode = 'current'  # current, current_dossier
@@ -666,7 +666,7 @@ class GeneratedConfig:
     OpsiHazard1Leveling_DoScanningDevice = False
     OpsiHazard1Leveling_MinimumActionPointReserve = 200
     OpsiHazard1Leveling_ExecuteFixedPatrolScan = False
-    OpsiHazard1Leveling_Cl1Filter = 'ActionPoint > PurpleCoins'
+    OpsiHazard1Leveling_Cl1Filter = 'ActionPoint'
 
     # Group `OpsiSirenBug`
     OpsiSirenBug_SirenResearch_Enable = False

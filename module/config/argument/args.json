@@ -10358,7 +10358,7 @@
       },
       "AkashiShopFilter": {
         "type": "textarea",
-        "value": "ActionPoint > PurpleCoins"
+        "value": "ActionPoint"
       }
     },
     "Storage": {
@@ -11251,7 +11251,7 @@
       },
       "Cl1Filter": {
         "type": "textarea",
-        "value": "ActionPoint > PurpleCoins"
+        "value": "ActionPoint"
       }
     },
     "OpsiSirenBug": {

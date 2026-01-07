@@ -3736,7 +3736,7 @@
     },
     "AkashiShopFilter": {
       "name": "商店过滤器",
-      "help": "一般不需要修改，只买行动力和紫币即可"
+      "help": "默认只购买体力nanoda。如果要购买紫币，设置为 'ActionPoint > PurpleCoins'"
     }
   },
   "OpsiAshBeacon": {
@@ -4000,7 +4000,7 @@
     },
     "Cl1Filter": {
       "name": "明石购买筛选",
-      "help": "侵蚀一明石一般只购买体力nanoda,ActionPoint > PurpleCoins为购买紫币nanoda"
+      "help": "默认只购买体力nanoda。如果要同时购买紫币，设置为 'ActionPoint > PurpleCoins'"
     }
   },
   "OpsiSirenBug": {

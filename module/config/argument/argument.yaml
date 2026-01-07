@@ -995,7 +995,7 @@ OpsiGeneral:
   RepairPackThreshold: 0.9
   DoRandomMapEvent: true
   AkashiShopFilter: |-
-    ActionPoint > PurpleCoins
+    ActionPoint
 OpsiAshBeacon:
   AttackMode:
     value: current
@@ -1080,7 +1080,7 @@ OpsiHazard1Leveling:
   MinimumActionPointReserve: 200
   ExecuteFixedPatrolScan: false
   Cl1Filter: |-
-    ActionPoint > PurpleCoins
+    ActionPoint
 OpsiSirenBug:
   SirenResearch_Enable: false
   SirenBug_Enable: false
