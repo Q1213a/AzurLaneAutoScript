@@ -987,16 +987,22 @@ class OSMap(OSFleet, Map, GlobeCamera, StorageHandler, StrategicSearchHandler):
                 while not option_wait_timer.reached():
                     self.device.screenshot()
                     options = self._story_option_buttons_2()
+                    # 【强化调试日志】
+                    logger.info('================================================')
+                    logger.info(f'正在检测选项... 当前检测到: {len(options)} 个按钮')
                     if len(options) >= 3:
-                        logger.info('检测到剧情选项,验证文本')
+                        logger.info('>>> 满足3个选项条件, 进入OCR验证环节 <<<')
                         if self._verify_siren_research_options(options):
-                            logger.info('✓ 选项验证通过,确认为塞壬研究装置')
+                            logger.info('✓ 验证成功!')
                             options_verified = True
                             break
                         else:
-                            logger.warning('✗ 选项验证失败,不是目标装置')
+                            logger.warning('✗ 验证失败(文本不匹配)')
                             break
-                    time.sleep(0.3)
+                    elif len(options) > 0:
+                        logger.info(f'选项数量不足({len(options)}), 继续等待...')
+                    
+                    time.sleep(0.5)
                 
                 if options_verified:
                     # 验证通过,完全处理装置后标记
@@ -1204,16 +1210,22 @@ class OSMap(OSFleet, Map, GlobeCamera, StorageHandler, StrategicSearchHandler):
             while not option_wait_timer.reached():
                 self.device.screenshot()
                 options = self._story_option_buttons_2()
+                # 【强化调试日志】
+                logger.info('================================================')
+                logger.info(f'正在检测选项... 当前检测到: {len(options)} 个按钮')
                 if len(options) >= 3:
-                    logger.info('检测到剧情选项,验证文本')
+                    logger.info('>>> 满足3个选项条件, 进入OCR验证环节 <<<')
                     if self._verify_siren_research_options(options):
-                        logger.info('✓ 选项验证通过,确认为塞壬研究装置')
+                        logger.info('✓ 验证成功!')
                         options_verified = True
                         break
                     else:
-                        logger.warning('✗ 选项验证失败,不是目标装置')
+                        logger.warning('✗ 验证失败(文本不匹配)')
                         break
-                time.sleep(0.3)
+                elif len(options) > 0:
+                    logger.info(f'选项数量不足({len(options)}), 继续等待...')
+                
+                time.sleep(0.5)
             
             if options_verified:
                 # 验证通过,完全处理装置后标记
@@ -1575,6 +1587,7 @@ class OSMap(OSFleet, Map, GlobeCamera, StorageHandler, StrategicSearchHandler):
         Returns:
             bool: True表示验证通过,False表示验证失败
         """
+        logger.info(f'开始验证选项文本, 选项数量: {len(options)}')
         if len(options) < 3:
             logger.warning(f'选项数量不足: {len(options)}, 期望至少3个选项')
             return False
@@ -1594,22 +1607,24 @@ class OSMap(OSFleet, Map, GlobeCamera, StorageHandler, StrategicSearchHandler):
             results = []
             for i in range(min(3, len(options))):
                 option = options[i]
+                logger.info(f'正在OCR识别第 {i+1} 个选项区域: {option.button}')
                 ocr = Ocr(option, lang='cnocr', name=f'SIREN_RESEARCH_OPTION_{i+1}')
                 result = ocr.ocr(self.device.image)
                 
                 # 去除所有非中文字符(包括符号)
                 result_clean = re.sub(r'[^\u4e00-\u9fff]', '', result)
                 results.append(result_clean)
-                logger.info(f'选项{i+1} OCR结果: {result} -> 清理后: {result_clean}')
+                logger.info(f'选项{i+1} OCR文字: "{result}" -> 匹配文字: "{result_clean}"')
             
             # 验证每个选项是否包含对应的关键词
             match_count = 0
             for i, (result, kw_list) in enumerate(zip(results, keywords)):
-                if all(kw in result for kw in kw_list):
-                    logger.info(f'选项{i+1} 验证通过: 包含关键词 {kw_list}')
+                matched_kws = [kw for kw in kw_list if kw in result]
+                if len(matched_kws) == len(kw_list):
+                    logger.info(f'选项{i+1} 验证通过: 包含所有关键词 {kw_list}')
                     match_count += 1
                 else:
-                    logger.warning(f'选项{i+1} 验证失败: 缺少关键词 {kw_list}, 实际内容: {result}')
+                    logger.warning(f'选项{i+1} 验证不完全: 匹配到 {matched_kws}, 缺少 {set(kw_list) - set(matched_kws)}')
             
             # 至少2个选项匹配才算验证通过(容错)
             if match_count >= 2:
