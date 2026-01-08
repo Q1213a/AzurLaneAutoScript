@@ -419,13 +419,18 @@ class InfoHandler(ModuleBase):
                             from module.os_handler.assets import SIREN_OPTION_A, SIREN_OPTION_B, SIREN_OPTION_C
                             
                             # 使用模板匹配检测3个选项
-                            match_a = SIREN_OPTION_A.match(self.device.image, similarity=0.85)
-                            match_b = SIREN_OPTION_B.match(self.device.image, similarity=0.85)
-                            match_c = SIREN_OPTION_C.match(self.device.image, similarity=0.85)
+                            sim_a, _ = SIREN_OPTION_A.match_result(self.device.image)
+                            sim_b, _ = SIREN_OPTION_B.match_result(self.device.image)
+                            sim_c, _ = SIREN_OPTION_C.match_result(self.device.image)
+                            
+                            threshold = 0.70
+                            match_a = sim_a > threshold
+                            match_b = sim_b > threshold
+                            match_c = sim_c > threshold
                             
                             # 至少2个选项匹配就认为是塞壬研究装置(容错)
                             matches = sum([1 for m in [match_a, match_b, match_c] if m])
-                            logger.info(f'[Story] 塞壬研究装置模板匹配结果: A={match_a}, B={match_b}, C={match_c}, 总计={matches}/3')
+                            logger.info(f'[Story] 塞壬研究装置模板匹配结果: A={sim_a:.3f}, B={sim_b:.3f}, C={sim_c:.3f}, 阈值={threshold}, 总计={matches}/3')
                             
                             if matches >= 2:
                                 is_siren_device = True
