@@ -8,6 +8,33 @@ from module.os_handler.action_point import ActionPointLimit
 
 
 class OpsiMeowfficerFarming(OSMap):
+    def _get_operation_coins_return_threshold(self):
+        """
+        计算返回侵蚀1所需的黄币阈值。
+
+        规则：
+        - 如果配置 `OperationCoinsReturnThreshold` 为 0，则返回 0（表示禁用黄币检查）。
+        - 否则，读取 `OpsiHazard1Leveling.OperationCoinsPreserve`（默认 100000），
+          并将其与 `OperationCoinsReturnThreshold` 相加（当后者为 None 时视为 0），
+          返回计算后的阈值整数。
+        """
+        raw = self.config.cross_get(
+            keys='OpsiMeowfficerFarming.OpsiMeowfficerFarming.OperationCoinsReturnThreshold',
+            default=None
+        )
+        # 0 表示显式禁用黄币检查
+        if raw == 0:
+            return 0
+
+        # 仅读取一次 preserve 值以减少重复查询
+        cl1_preserve = self.config.cross_get(
+            keys='OpsiHazard1Leveling.OpsiHazard1Leveling.OperationCoinsPreserve',
+            default=100000
+        )
+
+        add = 0 if raw is None else int(raw)
+        return cl1_preserve + add
+
     def os_meowfficer_farming(self):
         """
         Recommend 3 or 5 for higher meowfficer searching point per action points ratio.
@@ -18,29 +45,11 @@ class OpsiMeowfficerFarming(OSMap):
         # 如果启用了CL1且黄币充足，直接返回CL1，不执行短猫
         # 如果 OperationCoinsReturnThreshold 为 0，则禁用黄币检查，只使用行动力阈值控制
         if self.is_cl1_enabled:
-            return_threshold = self.config.cross_get(
-                keys='OpsiMeowfficerFarming.OpsiMeowfficerFarming.OperationCoinsReturnThreshold',
-                default=None
-            )
-            # 如果值为 0，跳过黄币检查
+            return_threshold = self._get_operation_coins_return_threshold()
             if return_threshold == 0:
                 logger.info('OperationCoinsReturnThreshold 为 0，禁用黄币检查，仅使用行动力阈值控制')
             else:
                 yellow_coins = self.get_yellow_coins()
-                if return_threshold is None:
-                    # 使用 cross_get 正确读取嵌套配置
-                    cl1_preserve = self.config.cross_get(
-                        keys='OpsiHazard1Leveling.OpsiHazard1Leveling.OperationCoinsPreserve',
-                        default=100000
-                    )
-                    return_threshold = cl1_preserve
-                # 使用 cross_get 正确读取嵌套配置
-                cl1_preserve = self.config.cross_get(
-                    keys='OpsiHazard1Leveling.OpsiHazard1Leveling.OperationCoinsPreserve',
-                    default=100000
-                )
-                # 新逻辑：返回阈值 = CL1黄币不足阈值 + 黄币充足返回侵蚀1阈值
-                return_threshold = cl1_preserve + return_threshold
                 logger.info(f'【任务开始前黄币检查】黄币={yellow_coins}, 阈值={return_threshold}')
                 if yellow_coins >= return_threshold:
                     logger.info(f'黄币充足 ({yellow_coins} >= {return_threshold})，跳过短猫相接，返回侵蚀1')
@@ -94,26 +103,10 @@ class OpsiMeowfficerFarming(OSMap):
                 keep_current_ap = True
                 check_rest_ap = True
                 if self.is_cl1_enabled:
-                    return_threshold = self.config.cross_get(
-                        keys='OpsiMeowfficerFarming.OpsiMeowfficerFarming.OperationCoinsReturnThreshold',
-                        default=None
-                    )
+                    return_threshold = self._get_operation_coins_return_threshold()
                     # 如果值为 0，跳过黄币检查
                     if return_threshold != 0:
                         yellow_coins = self.get_yellow_coins()
-                        if return_threshold is None:
-                            cl1_preserve = self.config.cross_get(
-                                keys='OpsiHazard1Leveling.OpsiHazard1Leveling.OperationCoinsPreserve',
-                                default=100000
-                            )
-                            return_threshold = cl1_preserve
-                        # 使用 cross_get 正确读取嵌套配置
-                        cl1_preserve = self.config.cross_get(
-                            keys='OpsiHazard1Leveling.OpsiHazard1Leveling.OperationCoinsPreserve',
-                            default=100000
-                        )
-                        # 新逻辑：返回阈值 = CL1黄币不足阈值 + 黄币充足返回侵蚀1阈值
-                        return_threshold = cl1_preserve + return_threshold
                         if yellow_coins >= return_threshold:
                             check_rest_ap = False
                 if not self.is_cl1_enabled and self.config.OpsiGeneral_BuyActionPointLimit > 0:
@@ -245,28 +238,12 @@ class OpsiMeowfficerFarming(OSMap):
                 # 在每次循环后检查黄币是否充足，如果充足则返回侵蚀1
                 # 如果 OperationCoinsReturnThreshold 为 0，则禁用黄币检查
                 if self.is_cl1_enabled:
-                    return_threshold = self.config.cross_get(
-                        keys='OpsiMeowfficerFarming.OpsiMeowfficerFarming.OperationCoinsReturnThreshold',
-                        default=None
-                    )
+                    return_threshold = self._get_operation_coins_return_threshold()
                     # 如果值为 0，跳过黄币检查
                     if return_threshold == 0:
                         logger.debug('OperationCoinsReturnThreshold 为 0，跳过黄币检查')
                     else:
                         yellow_coins = self.get_yellow_coins()
-                        if return_threshold is None:
-                            cl1_preserve = self.config.cross_get(
-                                keys='OpsiHazard1Leveling.OpsiHazard1Leveling.OperationCoinsPreserve',
-                                default=100000
-                            )
-                            return_threshold = cl1_preserve
-                        # 使用 cross_get 正确读取嵌套配置
-                        cl1_preserve = self.config.cross_get(
-                            keys='OpsiHazard1Leveling.OpsiHazard1Leveling.OperationCoinsPreserve',
-                            default=100000
-                        )
-                        # 新逻辑：返回阈值 = CL1黄币不足阈值 + 黄币充足返回侵蚀1阈值
-                        return_threshold = cl1_preserve + return_threshold
                         if yellow_coins >= return_threshold:
                             logger.info(f'短猫相接中黄币充足 ({yellow_coins} >= {return_threshold})，切换回侵蚀1继续执行')
                             self.notify_push(
