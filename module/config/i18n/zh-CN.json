@@ -127,7 +127,7 @@
       "help": ""
     },
     "CoalitionSp": {
-      "name": "光影风尚——拍摄进行时！",
+      "name": "光影风尚——拍摄进行时！SP",
       "help": ""
     },
     "Commission": {
@@ -1429,10 +1429,9 @@
     "Mode": {
       "name": "难度",
       "help": "SP图需要使用活动每日SP运行",
-      "tc1": "tc1",
-      "tc2": "tc2",
-      "tc3": "tc3",
-      "sp": "sp",
+      "easy": "简单",
+      "normal": "普通",
+      "hard": "困难",
       "ex": "EX"
     },
     "Fleet": {

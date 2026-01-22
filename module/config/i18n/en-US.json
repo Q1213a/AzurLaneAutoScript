@@ -1429,10 +1429,9 @@
     "Mode": {
       "name": "Mode",
       "help": "SP needs to use event daily SP to run",
-      "tc1": "tc1",
-      "tc2": "tc2",
-      "tc3": "tc3",
-      "sp": "sp",
+      "easy": "easy",
+      "normal": "normal",
+      "hard": "hard",
       "ex": "ex"
     },
     "Fleet": {
