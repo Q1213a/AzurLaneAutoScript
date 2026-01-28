@@ -206,8 +206,16 @@ class OpsiHazard1Leveling(OSMap):
                         # 如果关闭，只启用短猫相接；如果开启，启用所有黄币补充任务
                         apply_to_all = self.config.cross_get(
                             keys='OpsiHazard1Leveling.OpsiScheduling.OperationCoinsReturnThresholdApplyToAllCoinTasks',
-                            default=True
+                            default=None
                         )
+                        # 如果cross_get返回None，尝试直接属性访问
+                        if apply_to_all is None:
+                            if hasattr(self.config, 'OpsiScheduling_OperationCoinsReturnThresholdApplyToAllCoinTasks'):
+                                apply_to_all = self.config.OpsiScheduling_OperationCoinsReturnThresholdApplyToAllCoinTasks
+                            else:
+                                # 如果属性也不存在，使用默认值True
+                                apply_to_all = True
+                        logger.info(f'【智能调度】黄币阈值适用范围配置读取: {apply_to_all}')
                         
                         task_names = {
                             'OpsiMeowfficerFarming': '短猫相接',
@@ -262,16 +270,16 @@ class OpsiHazard1Leveling(OSMap):
                         )
 
                         with self.config.multi_set():
+                            # 启用所有可用的黄币补充任务
+                            for task in available_tasks:
+                                self.config.task_call(task)
+                            
                             cd = self.nearest_task_cooling_down
                             if cd is not None:
                                 # 有冷却任务时，同时延迟侵蚀1任务到冷却任务之后
                                 # 避免侵蚀1在黄币补充任务被延迟后立即再次运行导致无限循环
                                 logger.info(f'有冷却任务 {cd.command}，延迟侵蚀1到 {cd.next_run}')
                                 self.config.task_delay(target=cd.next_run)
-                            else:
-                                # 启用所有可用的黄币补充任务
-                                for task in available_tasks:
-                                    self.config.task_call(task)
                         self.config.task_stop()
                     self.config.OpsiHazard1_PreviousCoinsApInsufficient = _previous_coins_ap_insufficient
             else:
