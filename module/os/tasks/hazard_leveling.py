@@ -152,15 +152,6 @@ class OpsiHazard1Leveling(OSMap):
                 self.config, 'OpsiHazard1Leveling_MinimumActionPointReserve', 200
             ))
 
-            # ===== 智能调度: 行动力保留覆盖 =====
-            # 如果启用了智能调度且设置了行动力保留值，优先使用智能调度的配置
-            if is_smart_scheduling_enabled(self.config):
-                if hasattr(self, '_get_smart_scheduling_action_point_preserve'):
-                    smart_ap_preserve = self._get_smart_scheduling_action_point_preserve()
-                    if smart_ap_preserve > 0:
-                        logger.info(f'【智能调度】行动力保留使用智能调度配置: {smart_ap_preserve} (原配置: {self.config.OS_ACTION_POINT_PRESERVE})')
-                        self.config.OS_ACTION_POINT_PRESERVE = smart_ap_preserve
-
             if self.config.is_task_enabled('OpsiAshBeacon') \
                     and not self._ash_fully_collected \
                     and self.config.OpsiAshBeacon_EnsureFullyCollected:
@@ -223,24 +214,25 @@ class OpsiHazard1Leveling(OSMap):
                         logger.info(f'行动力充足 ({self._action_point_total}), 切换到黄币补充任务获取黄币')
                         _previous_coins_ap_insufficient = False
                         
-                        # 检查黄币阈值适用范围配置
-                        # 默认值定义在 args.json (value: false)，表示仅短猫相接任务会应用黄币返回阈值
-                        apply_to_all = self.config.cross_get(
-                            keys='OpsiScheduling.OpsiScheduling.OperationCoinsReturnThresholdApplyToAllCoinTasks',
-                            default=None
-                        )
-                        # 如果cross_get返回None（表示用户未在配置文件中设置此值），尝试兼容旧配置路径
-                        if apply_to_all is None:
-                            legacy_path = 'OpsiHazard1Leveling.OpsiScheduling.OperationCoinsReturnThresholdApplyToAllCoinTasks'
-                            apply_to_all = self.config.cross_get(keys=legacy_path, default=None)
-                        # 如果所有路径都无法获取值，最终回退到 args.json 中定义的默认值 False
-                        if apply_to_all is None:
-                            if hasattr(self.config, 'OpsiScheduling_OperationCoinsReturnThresholdApplyToAllCoinTasks'):
-                                apply_to_all = self.config.OpsiScheduling_OperationCoinsReturnThresholdApplyToAllCoinTasks
-                            else:
-                                # 回退到 args.json 中定义的默认值 false（仅启用短猫）
-                                apply_to_all = False
-                        logger.info(f'【智能调度】黄币阈值适用范围配置读取: {apply_to_all}')
+                        # 读取四个独立任务开关配置
+                        task_enable_config = {
+                            'OpsiMeowfficerFarming': self.config.cross_get(
+                                keys='OpsiScheduling.OpsiScheduling.EnableMeowfficerFarming',
+                                default=True
+                            ),
+                            'OpsiObscure': self.config.cross_get(
+                                keys='OpsiScheduling.OpsiScheduling.EnableObscure',
+                                default=False
+                            ),
+                            'OpsiAbyssal': self.config.cross_get(
+                                keys='OpsiScheduling.OpsiScheduling.EnableAbyssal',
+                                default=False
+                            ),
+                            'OpsiStronghold': self.config.cross_get(
+                                keys='OpsiScheduling.OpsiScheduling.EnableStronghold',
+                                default=False
+                            ),
+                        }
                         
                         task_names = {
                             'OpsiMeowfficerFarming': '短猫相接',
@@ -249,15 +241,15 @@ class OpsiHazard1Leveling(OSMap):
                             'OpsiStronghold': '塞壬要塞'
                         }
                         
-                        # 根据配置决定启用哪些任务
-                        if apply_to_all:
-                            # 开启：启用所有黄币补充任务（短猫、隐秘海域、深渊海域、塞壬要塞）
-                            all_coin_tasks = ['OpsiMeowfficerFarming', 'OpsiObscure', 'OpsiAbyssal', 'OpsiStronghold']
-                            logger.info('黄币阈值适用范围：四任务，将启用所有黄币补充任务')
-                        else:
-                            # 关闭：仅启用短猫相接
+                        # 获取智能调度中启用的任务列表
+                        all_coin_tasks = [task for task, enabled in task_enable_config.items() if enabled]
+                        
+                        if not all_coin_tasks:
+                            logger.warning('智能调度中没有启用任何黄币补充任务，默认启用短猫相接')
                             all_coin_tasks = ['OpsiMeowfficerFarming']
-                            logger.info('黄币阈值适用范围：仅短猫，将只启用短猫相接任务')
+                        
+                        enabled_names = '、'.join([task_names.get(task, task) for task in all_coin_tasks])
+                        logger.info(f'【智能调度】启用的黄币补充任务: {enabled_names}')
                         
                         # 自动启用黄币补充任务的调度器
                         enabled_tasks = []

@@ -703,7 +703,10 @@ class GeneratedConfig:
     OpsiScheduling_ActionPointPreserve = 500
     OpsiScheduling_ActionPointNotifyLevels = '500,1000,2000,3000'
     OpsiScheduling_OperationCoinsReturnThreshold = 30000
-    OpsiScheduling_OperationCoinsReturnThresholdApplyToAllCoinTasks = False  # True, False
+    OpsiScheduling_EnableMeowfficerFarming = True  # True, False
+    OpsiScheduling_EnableObscure = False  # True, False
+    OpsiScheduling_EnableAbyssal = False  # True, False
+    OpsiScheduling_EnableStronghold = False  # True, False
 
     # Group `IslandSeasonTask`
     IslandSeasonTask_TaskDict = None

@@ -59,7 +59,11 @@ class CoinTaskMixin:
     # 配置路径常量
     CONFIG_PATH_CL1_PRESERVE = 'OpsiHazard1Leveling.OperationCoinsPreserve'
     CONFIG_PATH_RETURN_THRESHOLD = 'OpsiScheduling.OpsiScheduling.OperationCoinsReturnThreshold'
-    CONFIG_PATH_RETURN_THRESHOLD_APPLY_ALL = 'OpsiScheduling.OpsiScheduling.OperationCoinsReturnThresholdApplyToAllCoinTasks'
+    # 四个独立任务开关的配置路径
+    CONFIG_PATH_ENABLE_MEOWFFICER = 'OpsiScheduling.OpsiScheduling.EnableMeowfficerFarming'
+    CONFIG_PATH_ENABLE_OBSCURE = 'OpsiScheduling.OpsiScheduling.EnableObscure'
+    CONFIG_PATH_ENABLE_ABYSSAL = 'OpsiScheduling.OpsiScheduling.EnableAbyssal'
+    CONFIG_PATH_ENABLE_STRONGHOLD = 'OpsiScheduling.OpsiScheduling.EnableStronghold'
     # 智能调度新增配置路径
     CONFIG_PATH_SMART_CL1_PRESERVE = 'OpsiScheduling.OpsiScheduling.OperationCoinsPreserve'
     CONFIG_PATH_SMART_AP_PRESERVE = 'OpsiScheduling.OpsiScheduling.ActionPointPreserve'
@@ -256,22 +260,42 @@ class CoinTaskMixin:
             return self.config.task.command
         return self.__class__.__name__
     
+    def _get_enabled_coin_tasks(self):
+        """
+        获取智能调度中启用的黄币补充任务列表
+        
+        Returns:
+            list: 启用的任务名称列表
+        """
+        enabled_tasks = []
+        
+        # 检查每个任务的独立开关
+        task_config_map = {
+            'OpsiMeowfficerFarming': self.CONFIG_PATH_ENABLE_MEOWFFICER,
+            'OpsiObscure': self.CONFIG_PATH_ENABLE_OBSCURE,
+            'OpsiAbyssal': self.CONFIG_PATH_ENABLE_ABYSSAL,
+            'OpsiStronghold': self.CONFIG_PATH_ENABLE_STRONGHOLD,
+        }
+        
+        for task_name, config_path in task_config_map.items():
+            if self.config.cross_get(keys=config_path, default=False):
+                enabled_tasks.append(task_name)
+        
+        return enabled_tasks
+    
     def _is_operation_coins_return_threshold_applicable(self):
         """
         判断当前任务是否应该应用黄币返回阈值
         
         Config:
-            OpsiScheduling.OperationCoinsReturnThresholdApplyToAllCoinTasks (bool)
-                - True: 适用于所有黄币补充任务
-                - False: 仅适用于 OpsiMeowfficerFarming（短猫相接）
+            OpsiScheduling.EnableMeowfficerFarming (bool) - 启用短猫相接
+            OpsiScheduling.EnableObscure (bool) - 启用隐秘海域
+            OpsiScheduling.EnableAbyssal (bool) - 启用深渊海域
+            OpsiScheduling.EnableStronghold (bool) - 启用塞壬要塞
         """
-        apply_all = self.config.cross_get(
-            keys=self.CONFIG_PATH_RETURN_THRESHOLD_APPLY_ALL,
-            default=True
-        )
-        if apply_all:
-            return True
-        return self._get_current_coin_task_name() == self.TASK_NAME_MEOWFFICER_FARMING
+        enabled_tasks = self._get_enabled_coin_tasks()
+        current_task = self._get_current_coin_task_name()
+        return current_task in enabled_tasks
     
     def _check_yellow_coins_and_return_to_cl1(self, context="循环中", task_display_name=None):
         """
@@ -644,15 +668,6 @@ class OpsiScheduling(CoinTaskMixin, OSMap):
         """
         切换到黄币补充任务
         """
-        # 检查黄币阈值适用范围配置
-        # 默认值定义在 args.json (value: false)，表示仅短猫相接任务会应用黄币返回阈值
-        apply_to_all = self.config.cross_get(
-            keys='OpsiScheduling.OpsiScheduling.OperationCoinsReturnThresholdApplyToAllCoinTasks',
-            default=False
-        )
-        
-        logger.info(f'【智能调度】黄币阈值适用范围配置: {apply_to_all}')
-        
         task_names = {
             'OpsiMeowfficerFarming': '短猫相接',
             'OpsiObscure': '隐秘海域',
@@ -660,13 +675,15 @@ class OpsiScheduling(CoinTaskMixin, OSMap):
             'OpsiStronghold': '塞壬要塞'
         }
         
-        # 根据配置决定启用哪些任务
-        if apply_to_all:
-            all_coin_tasks = ['OpsiMeowfficerFarming', 'OpsiObscure', 'OpsiAbyssal', 'OpsiStronghold']
-            logger.info('黄币阈值适用范围：四任务，将启用所有黄币补充任务')
-        else:
+        # 获取智能调度中启用的任务列表
+        all_coin_tasks = self._get_enabled_coin_tasks()
+        
+        if not all_coin_tasks:
+            logger.warning('智能调度中没有启用任何黄币补充任务，默认启用短猫相接')
             all_coin_tasks = ['OpsiMeowfficerFarming']
-            logger.info('黄币阈值适用范围：仅短猫，将只启用短猫相接任务')
+        
+        enabled_names = '、'.join([task_names.get(task, task) for task in all_coin_tasks])
+        logger.info(f'【智能调度】启用的黄币补充任务: {enabled_names}')
         
         # 自动启用黄币补充任务的调度器
         enabled_tasks = []

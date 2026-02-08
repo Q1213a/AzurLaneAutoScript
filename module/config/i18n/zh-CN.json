@@ -4146,7 +4146,7 @@
     },
     "ActionPointPreserve": {
       "name": "行动力最低保留",
-      "help": "智能调度切换任务时，侵蚀1和所有黄币补充任务保留的最低行动力值\n建议设置不低于 500，开启智能调度时此设置会覆盖侵蚀1和短猫任务下的行动力阈值"
+      "help": "设为 0 时不覆盖，使用短猫任务自己的配置；设为大于 0 时会覆盖短猫任务的行动力阈值\n建议设置不低于 1000"
     },
     "ActionPointNotifyLevels": {
       "name": "行动力推送阈值",
@@ -4156,9 +4156,27 @@
       "name": "黄币补充任务需补充的黄币数",
       "help": "侵蚀1黄币不足后，需要短猫相接补充多少黄币才返回侵蚀1\n计算公式：返回阈值 = 侵蚀1黄币最低保留 + 此值\n例如：侵蚀1黄币最低保留=100000，此值=50000，则任务运行到黄币≥150000时返回CL1"
     },
-    "OperationCoinsReturnThresholdApplyToAllCoinTasks": {
-      "name": "黄币阈值适用范围：四任务/仅短猫",
-      "help": "开启：此黄币返回阈值同时应用于短猫相接、隐秘海域、深渊海域、塞壬要塞；关闭：仅短猫相接使用此黄币返回阈值，其它三个任务不做黄币达标就返回侵蚀1的检查；智能调度中，黄币不足时只启用短猫相接任务，不启用其他三个任务",
+    "EnableMeowfficerFarming": {
+      "name": "启用短猫相接",
+      "help": "智能调度中是否启用短猫相接任务来补充黄币",
+      "True": "已启用",
+      "False": "未启用"
+    },
+    "EnableObscure": {
+      "name": "启用隐秘海域",
+      "help": "智能调度中是否启用隐秘海域任务来补充黄币",
+      "True": "已启用",
+      "False": "未启用"
+    },
+    "EnableAbyssal": {
+      "name": "启用深渊海域",
+      "help": "智能调度中是否启用深渊海域任务来补充黄币",
+      "True": "已启用",
+      "False": "未启用"
+    },
+    "EnableStronghold": {
+      "name": "启用塞壬要塞",
+      "help": "智能调度中是否启用塞壬要塞任务来补充黄币",
       "True": "已启用",
       "False": "未启用"
     }
@@ -4467,7 +4485,10 @@
       "ActionPointPreserve": "Gui.OpsiScheduling.ActionPointPreserve",
       "ActionPointNotifyLevels": "Gui.OpsiScheduling.ActionPointNotifyLevels",
       "OperationCoinsReturnThreshold": "Gui.OpsiScheduling.OperationCoinsReturnThreshold",
-      "OperationCoinsReturnThresholdApplyToAllCoinTasks": "Gui.OpsiScheduling.OperationCoinsReturnThresholdApplyToAllCoinTasks"
+      "EnableMeowfficerFarming": "Gui.OpsiScheduling.EnableMeowfficerFarming",
+      "EnableObscure": "Gui.OpsiScheduling.EnableObscure",
+      "EnableAbyssal": "Gui.OpsiScheduling.EnableAbyssal",
+      "EnableStronghold": "Gui.OpsiScheduling.EnableStronghold"
     }
   }
 }

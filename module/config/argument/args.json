@@ -11460,7 +11460,31 @@
         "type": "input",
         "value": 30000
       },
-      "OperationCoinsReturnThresholdApplyToAllCoinTasks": {
+      "EnableMeowfficerFarming": {
+        "type": "checkbox",
+        "value": true,
+        "option": [
+          true,
+          false
+        ]
+      },
+      "EnableObscure": {
+        "type": "checkbox",
+        "value": false,
+        "option": [
+          true,
+          false
+        ]
+      },
+      "EnableAbyssal": {
+        "type": "checkbox",
+        "value": false,
+        "option": [
+          true,
+          false
+        ]
+      },
+      "EnableStronghold": {
         "type": "checkbox",
         "value": false,
         "option": [

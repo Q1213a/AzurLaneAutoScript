@@ -166,4 +166,7 @@ OpsiScheduling:
   ActionPointPreserve:
   ActionPointNotifyLevels:
   OperationCoinsReturnThreshold:
-  OperationCoinsReturnThresholdApplyToAllCoinTasks:
+  EnableMeowfficerFarming:
+  EnableObscure:
+  EnableAbyssal:
+  EnableStronghold:
