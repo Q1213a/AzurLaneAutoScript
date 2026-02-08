@@ -4140,6 +4140,12 @@
       "name": "智能调度",
       "help": "大世界智能调度功能，用于协调侵蚀1练级与黄币补充任务之间的切换\n启用后将根据黄币和行动力自动在不同任务之间切换并发送推送通知"
     },
+    "UseSmartSchedulingOperationCoinsPreserve": {
+      "name": "获取 X 个作战补给凭证",
+      "help": "启用后将使用下方设置的 获取 X 个作战补给凭证 的配置，禁用则使用侵蚀1练级 黄币保留配置\n关闭后将使用行动力控制\n打开后使用黄币控制",
+      "True": "True",
+      "False": "False"
+    },
     "OperationCoinsPreserve": {
       "name": "侵蚀1练级 保留 X 个作战补给凭证",
       "help": "作战补给凭证低于 X 时运行黄币补充任务，不建议修改"
@@ -4153,8 +4159,8 @@
       "help": "行动力升至或降至这些阈值时会发送推送通知\n使用逗号分隔多个阈值，例如: 500,1000,2000,3000\n注意：需要在 Alas - 错误处理 中配置推送通知才能生效"
     },
     "OperationCoinsReturnThreshold": {
-      "name": "黄币补充任务需补充的黄币数",
-      "help": "侵蚀1黄币不足后，需要短猫相接补充多少黄币才返回侵蚀1\n计算公式：返回阈值 = 侵蚀1黄币最低保留 + 此值\n例如：侵蚀1黄币最低保留=100000，此值=50000，则任务运行到黄币≥150000时返回CL1"
+      "name": "获取 X 个作战补给凭证",
+      "help": "在黄币获取任务时 共获取到 X 个作战补给凭证后返回侵蚀1练级"
     },
     "EnableMeowfficerFarming": {
       "name": "启用短猫相接",
@@ -4481,6 +4487,7 @@
       "ChooseFile": "选择文件"
     },
     "OpsiScheduling": {
+      "UseSmartSchedulingOperationCoinsPreserve": "Gui.OpsiScheduling.UseSmartSchedulingOperationCoinsPreserve",
       "OperationCoinsPreserve": "Gui.OpsiScheduling.OperationCoinsPreserve",
       "ActionPointPreserve": "Gui.OpsiScheduling.ActionPointPreserve",
       "ActionPointNotifyLevels": "Gui.OpsiScheduling.ActionPointNotifyLevels",

@@ -1106,8 +1106,12 @@ OpsiCheckLeveling:
   LastRun: 2020-01-01 00:00:00
   DelayAfterFull: false
 OpsiScheduling:
+  UseSmartSchedulingOperationCoinsPreserve:
+    type: checkbox
+    value: false
+    option: [true, false]
   OperationCoinsPreserve:
-    value: 100000
+    value: 0
   ActionPointPreserve:
     value: 500
   ActionPointNotifyLevels:
@@ -1115,7 +1119,7 @@ OpsiScheduling:
     value: "500,1000,2000,3000"
     valuetype: str
   OperationCoinsReturnThreshold:
-    value: 30000
+    value: 0
   EnableMeowfficerFarming:
     type: checkbox
     value: true

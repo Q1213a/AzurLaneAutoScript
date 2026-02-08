@@ -4140,6 +4140,12 @@
       "name": "OpsiScheduling._info.name",
       "help": "OpsiScheduling._info.help"
     },
+    "UseSmartSchedulingOperationCoinsPreserve": {
+      "name": "OpsiScheduling.UseSmartSchedulingOperationCoinsPreserve.name",
+      "help": "OpsiScheduling.UseSmartSchedulingOperationCoinsPreserve.help",
+      "True": "True",
+      "False": "False"
+    },
     "OperationCoinsPreserve": {
       "name": "OpsiScheduling.OperationCoinsPreserve.name",
       "help": "OpsiScheduling.OperationCoinsPreserve.help"
@@ -4481,6 +4487,7 @@
       "ChooseFile": "Gui.Text.ChooseFile"
     },
     "OpsiScheduling": {
+      "UseSmartSchedulingOperationCoinsPreserve": "Gui.OpsiScheduling.UseSmartSchedulingOperationCoinsPreserve",
       "OperationCoinsPreserve": "Gui.OpsiScheduling.OperationCoinsPreserve",
       "ActionPointPreserve": "Gui.OpsiScheduling.ActionPointPreserve",
       "ActionPointNotifyLevels": "Gui.OpsiScheduling.ActionPointNotifyLevels",

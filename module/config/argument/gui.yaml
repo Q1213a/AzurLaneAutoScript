@@ -162,6 +162,7 @@ Text:
   ChooseFile:
 
 OpsiScheduling:
+  UseSmartSchedulingOperationCoinsPreserve:
   OperationCoinsPreserve:
   ActionPointPreserve:
   ActionPointNotifyLevels:

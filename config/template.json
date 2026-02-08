@@ -2242,11 +2242,15 @@
       "ServerUpdate": "00:00"
     },
     "OpsiScheduling": {
-      "OperationCoinsPreserve": 100000,
+      "UseSmartSchedulingOperationCoinsPreserve": false,
+      "OperationCoinsPreserve": 0,
       "ActionPointPreserve": 500,
       "ActionPointNotifyLevels": "500,1000,2000,3000",
-      "OperationCoinsReturnThreshold": 30000,
-      "OperationCoinsReturnThresholdApplyToAllCoinTasks": false
+      "OperationCoinsReturnThreshold": 0,
+      "EnableMeowfficerFarming": true,
+      "EnableObscure": false,
+      "EnableAbyssal": false,
+      "EnableStronghold": false
     },
     "Storage": {
       "Storage": {}
