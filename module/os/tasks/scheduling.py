@@ -475,10 +475,7 @@ class CoinTaskMixin:
         smart_enabled = is_smart_scheduling_enabled(self.config)
         if self.is_cl1_enabled and smart_enabled:
             yellow_coins = self.get_yellow_coins()
-            cl1_preserve = self.config.cross_get(
-                keys=self.CONFIG_PATH_CL1_PRESERVE,
-                default=100000
-            )
+            cl1_preserve = self._get_smart_scheduling_operation_coins_preserve()
             if yellow_coins < cl1_preserve:
                 should_try_other = True
                 logger.info(f'黄币不足 ({yellow_coins} < {cl1_preserve})，尝试其他黄币补充任务')
