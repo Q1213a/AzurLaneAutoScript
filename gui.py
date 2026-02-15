@@ -145,11 +145,15 @@ def run_cl1_migration():
         log_dir = project_root / 'log' / 'cl1'
         
         if not log_dir.exists():
+            logger.warning(f"Log directory not found: {log_dir}")
             return
 
         migrated_count = 0
+        dependencies = [p for p in log_dir.iterdir()]
+        logger.info(f"Scanning {log_dir}, found {len(dependencies)} items: {[p.name for p in dependencies]}")
+
         # 扫描 log/cl1 下的所有子文件夹
-        for instance_dir in log_dir.iterdir():
+        for instance_dir in dependencies:
             if instance_dir.is_dir():
                 json_file = instance_dir / 'cl1_monthly.json'
                 if json_file.exists():
@@ -159,6 +163,10 @@ def run_cl1_migration():
                         migrated_count += 1
                     except Exception as e:
                         logger.error(f"Failed to migrate {instance_dir.name}: {e}")
+                else:
+                     logger.info(f"No cl1_monthly.json in {instance_dir.name}")
+            else:
+                logger.info(f"Skipping non-directory: {instance_dir.name}")
         
         if migrated_count > 0:
             logger.info(f"Migration completed for {migrated_count} instance(s).")
