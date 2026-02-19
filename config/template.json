@@ -80,7 +80,8 @@
     "EmulatorInfo": {
       "Emulator": "auto",
       "name": null,
-      "path": null
+      "path": null,
+      "emulator_id": 0
     },
     "Error": {
       "HandleError": true,
@@ -805,11 +806,13 @@
       "Fleet1Control": "prevent_yellow_face",
       "Fleet1Recover": "not_in_dormitory",
       "Fleet1Oath": false,
+      "Fleet1Onsen": false,
       "Fleet2Value": 119,
       "Fleet2Record": "2020-01-01 00:00:00",
       "Fleet2Control": "prevent_yellow_face",
       "Fleet2Recover": "not_in_dormitory",
-      "Fleet2Oath": false
+      "Fleet2Oath": false,
+      "Fleet2Onsen": false
     },
     "Storage": {
       "Storage": {}

@@ -388,6 +388,11 @@
       "path": {
         "type": "textarea",
         "value": null
+      },
+      "emulator_id": {
+        "type": "input",
+        "value": 0,
+        "valuetype": "int"
       }
     },
     "Error": {
@@ -2736,7 +2741,9 @@
         "option": [
           "Main",
           "Main2",
-          "Main3"
+          "Main3",
+          "GemsFarming",
+          "ThreeOilLowCost"
         ]
       }
     },
@@ -3796,8 +3803,7 @@
       },
       "Fleet2Onsen": {
         "type": "checkbox",
-        "value": false,
-        "display": "hide"
+        "value": false
       }
     },
     "Storage": {
@@ -3949,6 +3955,7 @@
         "value": "non_stop",
         "option": [
           "non_stop",
+          "non_stop_clear_all",
           "100_percent_clear",
           "map_3_stars",
           "threat_safe",
@@ -4160,6 +4167,10 @@
         "type": "checkbox",
         "value": false
       },
+      "Fleet1Onsen": {
+        "type": "checkbox",
+        "value": false
+      },
       "Fleet2Value": {
         "type": "input",
         "value": 119,
@@ -4196,6 +4207,10 @@
         "type": "checkbox",
         "value": false,
         "display": "hide"
+      },
+      "Fleet2Onsen": {
+        "type": "checkbox",
+        "value": false
       }
     },
     "Storage": {
@@ -10844,7 +10859,8 @@
           2,
           3,
           4,
-          5
+          5,
+          6
         ]
       },
       "ShipIndex": {

@@ -85,6 +85,11 @@ class PlatformWindows(PlatformBase, EmulatorManager):
         Start a emulator without error handling
         """
         exe: str = instance.emulator.path
+        # Prioritize path in config
+        config_path = self.config.EmulatorInfo_path
+        if config_path and config_path != 'null':
+            exe = config_path.replace('\\', '/')
+
         if instance == Emulator.MuMuPlayer:
             # NemuPlayer.exe
             self.execute(exe)
@@ -94,9 +99,19 @@ class PlatformWindows(PlatformBase, EmulatorManager):
         elif instance == Emulator.MuMuPlayer12:
             # MuMuPlayer.exe -v 0
             # MuMuNxMain.exe -v 0
-            if instance.MuMuPlayer12_id is None:
+            # MuMuManager.exe -v 0 launch
+            idx = self.config.EmulatorInfo_emulator_id
+            if idx is None or idx == 'null':
+                idx = instance.MuMuPlayer12_id
+
+            if idx is None:
                 logger.warning(f'Cannot get MuMu instance index from name {instance.name}')
-            self.execute(f'"{exe}" -v {instance.MuMuPlayer12_id}')
+                idx = 0
+
+            if 'MuMuManager.exe' in exe:
+                self.execute(f'"{exe}" -v {idx} launch')
+            else:
+                self.execute(f'"{exe}" -v {idx}')
         elif instance == Emulator.LDPlayerFamily:
             # ldconsole.exe launch --index 0
             self.execute(f'"{Emulator.single_to_console(exe)}" launch --index {instance.LDPlayer_id}')

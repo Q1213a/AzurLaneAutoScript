@@ -518,6 +518,10 @@
     "path": {
       "name": "Emulator Installation Path",
       "help": ""
+    },
+    "emulator_id": {
+      "name": "EmulatorInfo.emulator_id.name",
+      "help": "EmulatorInfo.emulator_id.help"
     }
   },
   "Error": {
@@ -1349,7 +1353,9 @@
       "help": "Reminder: Players need to check task config before running, or TaskCall may not work.",
       "Main": "Main",
       "Main2": "Main-2",
-      "Main3": "Main-3"
+      "Main3": "Main-3",
+      "GemsFarming": "GemsFarming",
+      "ThreeOilLowCost": "ThreeOilLowCost"
     }
   },
   "EventDaily": {
@@ -3353,7 +3359,8 @@
       "2": "DR2",
       "3": "DR3",
       "4": "DR4",
-      "5": "DR5"
+      "5": "5",
+      "6": "6"
     },
     "ShipIndex": {
       "name": "Ship Index",
@@ -3388,7 +3395,7 @@
       "3": "PR3",
       "4": "PR4",
       "5": "PR5",
-      "6": "PR6"
+      "6": "6"
     },
     "ShipIndex": {
       "name": "Ship Index",
@@ -4336,75 +4343,6 @@
       "help": "Log back into the game when the game has been ended."
     }
   },
-  "ThreeOilLowCost": {
-    "_info": {
-      "name": "ThreeOilLowCost._info.name",
-      "help": "ThreeOilLowCost._info.help"
-    },
-    "ChangeFlagship": {
-      "name": "ThreeOilLowCost.ChangeFlagship.name",
-      "help": "ThreeOilLowCost.ChangeFlagship.help",
-      "ship": "ship",
-      "ship_equip": "ship_equip"
-    },
-    "CommonCV": {
-      "name": "ThreeOilLowCost.CommonCV.name",
-      "help": "ThreeOilLowCost.CommonCV.help",
-      "custom": "custom",
-      "any": "any",
-      "eagle": "eagle",
-      "langley": "langley",
-      "bogue": "bogue",
-      "ranger": "ranger",
-      "hermes": "hermes"
-    },
-    "CommonCVFilter": {
-      "name": "ThreeOilLowCost.CommonCVFilter.name",
-      "help": "ThreeOilLowCost.CommonCVFilter.help"
-    },
-    "ChangeVanguard": {
-      "name": "ThreeOilLowCost.ChangeVanguard.name",
-      "help": "ThreeOilLowCost.ChangeVanguard.help",
-      "disabled": "disabled",
-      "ship": "ship",
-      "ship_equip": "ship_equip"
-    },
-    "CommonDD": {
-      "name": "ThreeOilLowCost.CommonDD.name",
-      "help": "ThreeOilLowCost.CommonDD.help",
-      "custom": "custom",
-      "any": "any",
-      "favourite": "favourite",
-      "aulick_or_foote": "aulick_or_foote",
-      "cassin_or_downes": "cassin_or_downes",
-      "z20_or_z21": "z20_or_z21",
-      "DDG": "DDG"
-    },
-    "CommonDDFilter": {
-      "name": "ThreeOilLowCost.CommonDDFilter.name",
-      "help": "ThreeOilLowCost.CommonDDFilter.help"
-    },
-    "EquipmentCode": {
-      "name": "ThreeOilLowCost.EquipmentCode.name",
-      "help": "ThreeOilLowCost.EquipmentCode.help"
-    },
-    "ALLowHighFlagshipLevel": {
-      "name": "ThreeOilLowCost.ALLowHighFlagshipLevel.name",
-      "help": "ThreeOilLowCost.ALLowHighFlagshipLevel.help"
-    },
-    "ALLowLowVanguardLevel": {
-      "name": "ThreeOilLowCost.ALLowLowVanguardLevel.name",
-      "help": "ThreeOilLowCost.ALLowLowVanguardLevel.help"
-    },
-    "DelayTaskIFNoFlagship": {
-      "name": "ThreeOilLowCost.DelayTaskIFNoFlagship.name",
-      "help": "ThreeOilLowCost.DelayTaskIFNoFlagship.help"
-    },
-    "CommissionLimit": {
-      "name": "ThreeOilLowCost.CommissionLimit.name",
-      "help": "ThreeOilLowCost.CommissionLimit.help"
-    }
-  },
   "Storage": {
     "_info": {
       "name": "Task status",
@@ -4457,6 +4395,7 @@
     "MenuDevelop": {
       "HomePage": "Home",
       "Translate": "Translate",
+      "Announcement": "Gui.MenuDevelop.Announcement",
       "Update": "Updater",
       "Remote": "Remote access",
       "Utils": "Utils"
