@@ -2428,6 +2428,23 @@
       "Storage": {}
     }
   },
+  "OpsiDailyDelay": {
+    "Scheduler": {
+      "Enable": false,
+      "NextRun": "2020-01-01 00:00:00",
+      "Command": "OpsiDailyDelay",
+      "SuccessInterval": 0,
+      "FailureInterval": 120,
+      "ServerUpdate": "00:00"
+    },
+    "OpsiDailyDelay": {
+      "Enable": false,
+      "TriggerMinutesBeforeReset": 5
+    },
+    "Storage": {
+      "Storage": {}
+    }
+  },
   "IslandInfo": {
     "IslandSeasonTask": {
       "TaskDict": null

@@ -28,7 +28,7 @@ class ManualConfig:
 
     _DEFAULT_SCHEDULER_PRIORITY = """
     Restart
-    > OpsiCrossMonth
+    > OpsiCrossMonth > OpsiDailyDelay
     > Commission > Tactical > Research
     > Exercise
     > Dorm > Meowfficer > Guild > Gacha

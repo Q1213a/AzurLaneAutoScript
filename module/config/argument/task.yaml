@@ -351,6 +351,9 @@ Opsi:
       - OpsiScheduling
     OpsiCrossMonth:
       - Scheduler
+    OpsiDailyDelay:
+      - Scheduler
+      - OpsiDailyDelay
 
 # =================== Island ===================
 Island:

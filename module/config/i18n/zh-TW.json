@@ -278,6 +278,10 @@
       "name": "跨月每日",
       "help": "    Alas將在大世界跨月重置之前10分鐘進入大世界，等待大世界重置但不退出大世界，然後完成新一天的大世界每日、隱秘海域、深淵海域和短貓相接，以獲得額外的金菜。運行大世界每日時，按\"大世界每日\"任務設定運行，其餘同理。\n    重要：Alas等待跨月期間，請不要操作遊戲。"
     },
+    "OpsiDailyDelay": {
+      "name": "Task.OpsiDailyDelay.name",
+      "help": "Task.OpsiDailyDelay.help"
+    },
     "IslandInfo": {
       "name": "Task.IslandInfo.name",
       "help": "Task.IslandInfo.help"
@@ -4567,6 +4571,22 @@
       "help": "OpsiScheduling.EnableStronghold.help",
       "True": "True",
       "False": "False"
+    }
+  },
+  "OpsiDailyDelay": {
+    "_info": {
+      "name": "OpsiDailyDelay._info.name",
+      "help": "OpsiDailyDelay._info.help"
+    },
+    "Enable": {
+      "name": "OpsiDailyDelay.Enable.name",
+      "help": "OpsiDailyDelay.Enable.help",
+      "True": "True",
+      "False": "False"
+    },
+    "TriggerMinutesBeforeReset": {
+      "name": "OpsiDailyDelay.TriggerMinutesBeforeReset.name",
+      "help": "OpsiDailyDelay.TriggerMinutesBeforeReset.help"
     }
   },
   "IslandSeasonTask": {

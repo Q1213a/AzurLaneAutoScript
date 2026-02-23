@@ -1173,6 +1173,14 @@ OpsiScheduling:
     value: false
     option: [true, false]
 
+OpsiDailyDelay:
+  Enable:
+    type: checkbox
+    value: false
+    option: [true, false]
+  TriggerMinutesBeforeReset:
+    value: 5
+
 # =================== Island ====================
 IslandSeasonTask:
   TaskDict:

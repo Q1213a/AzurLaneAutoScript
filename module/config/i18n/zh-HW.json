@@ -278,6 +278,10 @@
       "name": "跨月无缝衔接",
       "help": "    基于毫秒级时间同步，Alas将在重置前10分钟介入，通过驻留进程实现跨月无缝流转。自动完成跨周期的高价值任务链（每日/隐秘/深渊/短猫）以最大化金菜产出。\n    核心提示：系统执行跨月驻留协议期间，请勿进行人工干预，以免破坏进程保活。"
     },
+    "OpsiDailyDelay": {
+      "name": "Task.OpsiDailyDelay.name",
+      "help": "Task.OpsiDailyDelay.help"
+    },
     "IslandInfo": {
       "name": "Task.IslandInfo.name",
       "help": "Task.IslandInfo.help"
@@ -4567,6 +4571,22 @@
       "help": "OpsiScheduling.EnableStronghold.help",
       "True": "True",
       "False": "False"
+    }
+  },
+  "OpsiDailyDelay": {
+    "_info": {
+      "name": "OpsiDailyDelay._info.name",
+      "help": "OpsiDailyDelay._info.help"
+    },
+    "Enable": {
+      "name": "OpsiDailyDelay.Enable.name",
+      "help": "OpsiDailyDelay.Enable.help",
+      "True": "True",
+      "False": "False"
+    },
+    "TriggerMinutesBeforeReset": {
+      "name": "OpsiDailyDelay.TriggerMinutesBeforeReset.name",
+      "help": "OpsiDailyDelay.TriggerMinutesBeforeReset.help"
     }
   },
   "IslandSeasonTask": {
