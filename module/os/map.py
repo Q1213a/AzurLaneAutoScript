@@ -689,7 +689,7 @@ class OSMap(OSFleet, Map, GlobeCamera, StorageHandler, StrategicSearchHandler):
                     if is_cl1_task and is_cl1_enabled:
                         try:
                             from module.statistics.ship_exp_stats import get_ship_exp_stats
-                            get_ship_exp_stats(instance_name=_instance_name).record_round_time(cost)
+                            get_ship_exp_stats(instance_name=instance_name).record_round_time(cost)
                         except Exception:
                             logger.exception('Failed to record cl1 round time')
                             
