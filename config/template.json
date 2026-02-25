@@ -86,6 +86,7 @@
       "HandleError": true,
       "SaveError": true,
       "StrictRestart": false,
+      "SaveErrorCount": 30,
       "OnePushConfig": "provider: null",
       "ScreenshotLength": 1,
       "GameStuckRestart": false,
@@ -121,6 +122,11 @@
     }
   },
   "General": {
+    "Log": {
+      "LogKeepCount": 7,
+      "LogBackUpMethod": "delete",
+      "ZipMethod": "bz2"
+    },
     "Retirement": {
       "RetireMode": "one_click_retire"
     },

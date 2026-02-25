@@ -10,6 +10,7 @@ Alas:
       - DropRecord
       - EmulatorManagement
     General:
+      - Log
       - Retirement
       - OneClickRetire
       - Enhance

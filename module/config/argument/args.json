@@ -403,6 +403,10 @@
         "type": "checkbox",
         "value": false
       },
+      "SaveErrorCount": {
+        "type": "input",
+        "value": 30
+      },
       "OnePushConfig": {
         "type": "textarea",
         "value": "provider: null",
@@ -566,6 +570,31 @@
     }
   },
   "General": {
+    "Log": {
+      "LogKeepCount": {
+        "type": "input",
+        "value": 7
+      },
+      "LogBackUpMethod": {
+        "type": "select",
+        "value": "delete",
+        "option": [
+          "delete",
+          "zip",
+          "copy"
+        ]
+      },
+      "ZipMethod": {
+        "type": "select",
+        "value": "bz2",
+        "option": [
+          "bz2",
+          "gzip",
+          "xz",
+          "zip"
+        ]
+      }
+    },
     "Retirement": {
       "RetireMode": {
         "type": "select",

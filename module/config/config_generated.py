@@ -100,6 +100,7 @@ class GeneratedConfig:
     Error_HandleError = True
     Error_SaveError = True
     Error_StrictRestart = False
+    Error_SaveErrorCount = 30
     Error_OnePushConfig = 'provider: null'
     Error_ScreenshotLength = 1
     Error_GameStuckRestart = False
@@ -125,6 +126,11 @@ class GeneratedConfig:
     DropRecord_MeowfficerTalent = 'do_not'  # do_not, save, upload, save_and_upload
     DropRecord_TelemetryReport = True
     DropRecord_BugReport = True
+
+    # Group `Log`
+    Log_LogKeepCount = 7
+    Log_LogBackUpMethod = 'delete'  # delete, zip, copy
+    Log_ZipMethod = 'bz2'  # bz2, gzip, xz, zip
 
     # Group `Retirement`
     Retirement_RetireMode = 'one_click_retire'  # one_click_retire, enhance, old_retire

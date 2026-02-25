@@ -118,7 +118,7 @@ if __name__ == "__main__":
         should_exit = False
         while not should_exit:
             event = Event()
-            process = Process(target=func, args=(event,))
+            process = Process(target=func, args=(event,), name="gui")
             process.start()
             logger.info(f"Started Alas web service (PID: {process.pid})")
             
