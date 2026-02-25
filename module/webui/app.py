@@ -169,11 +169,13 @@ class AlasGUI(Frame):
         self._announcement_force = False
 
 
+
     @use_scope("aside", clear=True)
     def set_aside(self) -> None:
         # TODO: update put_icon_buttons()
         put_icon_buttons(
             Icon.DEVELOP,
+            "false",
             buttons=[{"label": t("Gui.Aside.Home"), "value": "Home", "color": "aside"}],
             onclick=[self.ui_develop],
         )
@@ -184,6 +186,7 @@ class AlasGUI(Frame):
         self.set_aside_status()
         put_icon_buttons(
             Icon.SETTING,
+            "false",
             buttons=[
                 {
                     "label": t("Gui.AddAlas.Manage"),
@@ -205,15 +208,17 @@ class AlasGUI(Frame):
         def update(name, seq):
             with use_scope(f"alas-instance-{seq}", clear=True):
                 icon_html = Icon.RUN
-                rendered_state = ProcessManager.get_manager(inst).state
-                if rendered_state == 1 and self.af_flag:
+                rendered_state = ProcessManager.get_manager(name).state
+                if rendered_state == 1 and getattr(self, "af_flag", False):
                     icon_html = icon_html[:31] + ' anim-rotate' + icon_html[31:]
-                put_icon_buttons(
+                rendered_state = put_icon_buttons(
                     icon_html,
+                    "true",
                     buttons=[{"label": name, "value": name, "color": "aside"}],
                     onclick=self.ui_alas,
                 )
             return rendered_state
+
 
         if not len(self.rendered_cache) or self.load_home:
             # Reload when add/delete new instance | first start app.py | go to HomePage (HomePage load call force reload)
@@ -237,6 +242,7 @@ class AlasGUI(Frame):
             # Redraw lost focus, now focus on aside button
             aside_name = get_localstorage("aside")
             self.active_button("aside", aside_name)
+
 
         return
 
