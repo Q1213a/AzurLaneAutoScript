@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from scipy import signal
 
 from module.base.timer import Timer
+import time
 from module.base.utils import *
 from module.combat.assets import *
 from module.commission.assets import *
@@ -556,6 +557,20 @@ class RewardCommission(UI, InfoHandler):
                     continue
                 if self.appear(FUEL_MAXED):
                     logger.info("Fuel maxed, skip reward receive")
+                    # Debug logic for FUEL_MAXED false positive
+                    from module.base.utils import get_color, color_similar
+                    _color = get_color(self.device.image, FUEL_MAXED.area)
+                    _diff = np.max(np.abs(np.array(_color) - np.array(FUEL_MAXED.color)))
+                    logger.info(f"FUEL_MAXED triggered. Detected color: {_color}, Expected: {FUEL_MAXED.color}, Max Diff: {_diff} (Threshold: 10)")
+                    
+                    # Save the EXACT image frame that triggered the condition
+                    import os
+                    from PIL import Image
+                    os.makedirs('log/error', exist_ok=True)
+                    debug_image_path = f"log/error/FUEL_MAXED_debug_{int(time.time())}.png"
+                    Image.fromarray(self.device.image).save(debug_image_path)
+                    logger.info(f"Saved triggering frame to {debug_image_path}")
+                    
                     self.config.cross_set('Dorm.Dorm.BuyFood', True)
                     self.config.task_call('Dorm')
                     self.config.task_delay(minute=1)
