@@ -163,13 +163,14 @@ class Cl1Database:
 
     def _reconcile_meow_counts(
         self,
-        instance: str,
-        month_key: str,
         data: Dict[str, Any],
         effective_rounds: float,
         round_times: List[Any],
         battle_times: List[Any],
-    ) -> Tuple[int, float]:
+        instance: Optional[str] = None,
+        month_key: Optional[str] = None,
+        persist: bool = False,
+    ) -> Tuple[int, float, bool]:
         """兼容旧数据并修正短猫真实战斗场次与等效轮次。"""
         inferred_divisor, inferred_battles_per_round = self._infer_meow_battles_per_round(round_times)
         estimated_from_rounds = self._estimate_meow_raw_battle_count(effective_rounds, inferred_battles_per_round)
@@ -206,10 +207,75 @@ class Cl1Database:
                     effective_rounds = float(fixed_rounds)
                     should_save = True
 
-        if should_save:
+        if should_save and persist and instance and month_key:
             self.save_stats(instance, month_key, data)
 
-        return int(raw_battle_count), effective_rounds
+        return int(raw_battle_count), effective_rounds, should_save
+
+    def _list_stats_rows(self, instance: Optional[str] = None) -> List[Tuple[str, str]]:
+        """列出数据库中已有的实例与月份。"""
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                if instance:
+                    cursor.execute(
+                        "SELECT instance, month FROM cl1_data WHERE instance = ? ORDER BY month",
+                        (instance,),
+                    )
+                else:
+                    cursor.execute("SELECT instance, month FROM cl1_data ORDER BY instance, month")
+                return [(row[0], row[1]) for row in cursor.fetchall()]
+        except Exception as e:
+            logger.error(f"Failed to list stats rows: {e}")
+            return []
+
+    def backfill_meow_stats(self, instance: str, year: int = None, month: int = None) -> bool:
+        """显式回填指定月份的短猫统计。
+
+        仅在主动调用时落盘，避免读取统计时产生写入副作用。
+        """
+        if year is None or month is None:
+            now = datetime.now()
+            year = now.year
+            month = now.month
+
+        month_key = f"{year:04d}-{month:02d}"
+        data = self.get_stats(instance, month_key)
+        round_times = data.get('meow_round_times', [])
+        battle_times = data.get('meow_battle_times', [])
+        effective_rounds = float(data.get('meow_battle_count', 0) or 0)
+
+        _, _, changed = self._reconcile_meow_counts(
+            data=data,
+            effective_rounds=effective_rounds,
+            round_times=round_times,
+            battle_times=battle_times,
+            instance=instance,
+            month_key=month_key,
+            persist=True,
+        )
+        return changed
+
+    def backfill_all_meow_stats(self, instance: Optional[str] = None) -> Dict[str, int]:
+        """批量回填数据库内已有月份的短猫统计。"""
+        rows = self._list_stats_rows(instance=instance)
+        result = {'checked': 0, 'updated': 0}
+
+        for row_instance, month_key in rows:
+            if len(month_key) != 7 or month_key[4] != '-':
+                continue
+
+            try:
+                year = int(month_key[:4])
+                month = int(month_key[5:7])
+            except ValueError:
+                continue
+
+            result['checked'] += 1
+            if self.backfill_meow_stats(row_instance, year, month):
+                result['updated'] += 1
+
+        return result
 
     def save_stats(self, instance: str, month: str, data: Dict[str, Any]):
         """保存统计数据"""
@@ -468,13 +534,14 @@ class Cl1Database:
         battle_times = data.get('meow_battle_times', [])
 
         effective_rounds = float(data.get('meow_battle_count', 0) or 0)
-        battle_count, effective_rounds = self._reconcile_meow_counts(
-            instance=instance,
-            month_key=key,
+        battle_count, effective_rounds, _ = self._reconcile_meow_counts(
             data=data,
             effective_rounds=effective_rounds,
             round_times=round_times,
             battle_times=battle_times,
+            instance=instance,
+            month_key=key,
+            persist=True,
         )
 
         round_durations = self._extract_meow_round_durations(round_times)
