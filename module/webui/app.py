@@ -174,6 +174,11 @@ def build_copyable_device_id(device_id: str) -> str:
     return tpl.format(device_id=device_id)
 
 
+def build_recommendation_box(text: str) -> str:
+    tpl = read_webapp_template('recommendation_box.html')
+    return tpl.format(text=text)
+
+
 def build_app_manage_title(title: str) -> str:
     tpl = read_webapp_template('app_manage_title.html')
     return tpl.format(title=title)
