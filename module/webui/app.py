@@ -9,6 +9,7 @@ import requests
 import threading
 import time
 import re
+import base64
 from datetime import datetime, timedelta
 from pathlib import Path
 from functools import partial
@@ -1149,6 +1150,7 @@ class AlasGUI(Frame):
                 
     def _os_simulator(self):
         self.simulator.set_config(self.alas_config)
+        self._last_os_simulator_figure = None
 
         if self._simulator_logger_pm is None:
             class SimulatorLogger:
@@ -1189,6 +1191,9 @@ class AlasGUI(Frame):
                 put_scope("scheduler_btn"),
             ]
         )
+        
+        put_scope("figure_display")
+        
         put_scope(
             "logs",
             [
@@ -1237,6 +1242,32 @@ class AlasGUI(Frame):
             scope="log_scroll_btn",
         )
         self.task_handler.add(switch_log_scroll.g(), 1, True)
+
+        def _update_simulator_figure():
+            # Prevent flicker by checking if figure has changed
+            last_figure = getattr(self, '_last_os_simulator_figure', None)
+            if self.simulator.figure == last_figure:
+                return
+
+            figure_path = self.simulator.figure
+            self._last_os_simulator_figure = figure_path
+
+            if figure_path:
+                try:
+                    with open(figure_path, 'rb') as f:
+                        img_b64 = base64.b64encode(f.read()).decode('utf-8')
+                    with use_scope('figure_display', clear=True):
+                        put_html(f'<img src="data:image/png;base64,{img_b64}" style="max-width: 100%; height: auto; display: block; margin: 0 auto;">')
+                except FileNotFoundError:
+                    # This can happen if the figure is deleted before it's read
+                    with use_scope('figure_display', clear=True):
+                        pass # Clear the image
+                except Exception as e:
+                    logger.warning(f"Failed to update simulator figure: {e}")
+            else:
+                with use_scope('figure_display', clear=True):
+                    pass # Clear the image
+        self.task_handler.add(_update_simulator_figure, 0.5, True)
 
         self.task_handler.add(log.put_log(pm), 0.25, True)
 

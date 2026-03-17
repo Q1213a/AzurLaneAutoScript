@@ -1287,6 +1287,9 @@ EmulatorManagement:
     validate: [1, 24]
 OpsiSimulatorParameters:
   Samples: 1000
+  Draw:
+    value: do_not
+    option: [do_not, single_sample, multi_sample]
   TotalTime: 0
   TimeUseRatio:
     value: 0.8
