@@ -1293,3 +1293,15 @@ OpsiSimulatorParameters:
     validate: [0, 1]
   InitialAp: 0
   InitialCoin: 0
+  MeowHazardLevel:
+    value: level5
+    option:
+      level3: 3
+      level5: 5
+  Cl1Coin: 170
+  Meow3Coin: 750
+  Meow5Coin: 1700
+  AkashiProbability: 0.05
+  Cl1Time: 0
+  Meow3Time: 0
+  Meow5Time: 0
