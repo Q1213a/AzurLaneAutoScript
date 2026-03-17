@@ -13654,6 +13654,62 @@
       "InitialCoin": {
         "type": "input",
         "value": 0
+      },
+      "MeowHazardLevel": {
+        "type": "select",
+        "value": "level5",
+        "option": [
+          "level5",
+          "level3"
+        ]
+      },
+      "Cl1Time": {
+        "type": "input",
+        "value": 0
+      },
+      "Meow3Time": {
+        "type": "input",
+        "value": 0
+      },
+      "Meow5Time": {
+        "type": "input",
+        "value": 0
+      },
+      "Cl1Coin": {
+        "type": "input",
+        "value": 145
+      },
+      "Meow3Coin": {
+        "type": "input",
+        "value": 750
+      },
+      "Meow5Coin": {
+        "type": "input",
+        "value": 1700
+      },
+      "AkashiProbability": {
+        "type": "input",
+        "value": 0.05,
+        "validate": [
+          0,
+          1
+        ]
+      },
+      "Deterministic": {
+        "type": "checkbox",
+        "value": false,
+        "option": [
+          true,
+          false
+        ]
+      },
+      "BuyAp": {
+        "type": "checkbox",
+        "value": true,
+        "option": [
+          true,
+          false
+        ]
       }
     },
     "Storage": {
