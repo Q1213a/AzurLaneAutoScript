@@ -5,11 +5,18 @@ import time
 from datetime import datetime
 
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 
 from module.config.config import AzurLaneConfig
 from module.log_res.log_res import LogRes
 from module.statistics.cl1_database import db
 from module.statistics.ship_exp_stats import get_ship_exp_stats
+
+plt.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'SimSun', 'Arial'] 
+plt.rcParams['axes.unicode_minus'] = False
 
 class OSSimulator:
     def __init__(self):
@@ -40,7 +47,6 @@ class OSSimulator:
     MEOW_COUNT = 6
     CL1_COUNT = 7
     PASSED_DAYS = 8
-    TIMESTAMP = 9
     
     STATUS_CL1 = 0
     STATUS_MEOW = 1
@@ -93,6 +99,9 @@ class OSSimulator:
         
         self.samples = self.config.cross_get('OpsiSimulator.OpsiSimulatorParameters.Samples')
         self.logger.info(f'样本数: {self.samples}')
+
+        self.draw_setting = self.config.cross_get('OpsiSimulator.OpsiSimulatorParameters.Draw')
+        self.logger.info(f'绘图设置: {self.draw_setting}')
         
         self.total_time = self.config.cross_get('OpsiSimulator.OpsiSimulatorParameters.TotalTime')
         if not self.total_time:
@@ -124,8 +133,7 @@ class OSSimulator:
             np.zeros(self.samples), # has_earned_coin
             np.zeros(self.samples), # meow_count
             np.zeros(self.samples), # cl1_count
-            np.zeros(self.samples), # passed_days
-            np.ones(self.samples) * time.time(), # timestamp
+            np.zeros(self.samples) # passed_days
         ])
         self.logger.info(f'初始黄币: {coin}')
         self.logger.info(f'初始行动力: {ap}')
@@ -188,8 +196,7 @@ class OSSimulator:
             np.zeros(self.samples), # has_earned_coin
             np.zeros(self.samples), # meow_count
             np.zeros(self.samples), # cl1_count
-            np.zeros(self.samples), # passed_days
-            np.ones(self.samples) * time.time(), # timestamp
+            np.zeros(self.samples) # passed_days
         ])
         self.logger.info(f'初始黄币: {coin}')
         self.logger.info(f'初始行动力: {ap}')
@@ -231,6 +238,10 @@ class OSSimulator:
     @property
     def is_running(self):
         return bool(self._thread and self._thread.is_alive())
+    
+    @property
+    def figure(self):
+        return getattr(self, 'result_figure_path', '')
     
     def _run(self):
         try:
@@ -323,7 +334,6 @@ class OSSimulator:
         
         state[self.AP][mask] += self.AP_RECOVER * self.modified_cl1_time
         state[self.USED_TIME][mask] += self.modified_cl1_time
-        state[self.TIMESTAMP][mask] += self.modified_cl1_time
         
         self._handle_akashi(state, mask)
     
@@ -336,7 +346,6 @@ class OSSimulator:
         
         state[self.AP][mask] += self.AP_RECOVER * self.modified_meow_time
         state[self.USED_TIME][mask] += self.modified_meow_time
-        state[self.TIMESTAMP][mask] += self.modified_meow_time
         
         self._handle_akashi(state, mask)
     
@@ -345,7 +354,6 @@ class OSSimulator:
         skip_time = 43200   # 12 * 60 * 60
         
         state[self.USED_TIME][mask] += skip_time
-        state[self.TIMESTAMP][mask] += skip_time
         state[self.AP][mask] += 72
     
     def simulate(self):
@@ -353,16 +361,28 @@ class OSSimulator:
             self.get_paras()
             
         now_state = np.copy(self.initial_state)
-        # 记录历史数据，Shape: (Steps, 3, Samples)
-        history = []
+
+        if self.draw_setting == 'single_sample':
+            self.history_single = {
+                'time': [now_state[self.USED_TIME][0]],
+                'ap': [now_state[self.AP][0]],
+                'coin': [now_state[self.COIN][0]],
+                'status': [now_state[self.STATUS][0]]
+            }
+            last_time_0 = now_state[self.USED_TIME][0]
+        elif self.draw_setting == 'multi_sample':
+            self.history_mean = {
+                'time': [np.average(now_state[self.USED_TIME])],
+                'ap': [np.average(now_state[self.AP])],
+                'coin': [np.average(now_state[self.COIN])],
+                'meow_prob': [np.average(now_state[self.STATUS] == self.STATUS_MEOW)],
+                'has_crashed_prob': [np.average(now_state[self.HAS_CRASHED])]
+            }
         
         while np.any(now_state[self.STATUS] != self.STATUS_DONE):
             if self._stop_event.is_set():
                 self.logger.info("模拟中断")
-                break
-
-            # 记录当前平均状态
-            history.append([np.copy(now_state[self.AP]), np.copy(now_state[self.COIN]), np.copy(now_state[self.TIMESTAMP])])
+                raise KeyboardInterrupt
 
             # 1. 计算状态转移
             is_cl1 = now_state[self.STATUS] == self.STATUS_CL1
@@ -423,11 +443,26 @@ class OSSimulator:
             
             # 5. 标记完成状态
             now_state[self.STATUS][now_state[self.USED_TIME] >= self.total_time] = self.STATUS_DONE
+
+             # 6. 记录历史数据
+            if self.draw_setting == 'single_sample':
+                current_time_0 = now_state[self.USED_TIME][0]
+                if current_time_0 > last_time_0:
+                    self.history_single['time'].append(current_time_0)
+                    self.history_single['ap'].append(now_state[self.AP][0])
+                    self.history_single['coin'].append(now_state[self.COIN][0])
+                    self.history_single['status'].append(now_state[self.STATUS][0])
+                    last_time_0 = current_time_0
+            elif self.draw_setting == 'multi_sample':
+                self.history_mean['time'].append(np.average(now_state[self.USED_TIME]))
+                self.history_mean['ap'].append(np.average(now_state[self.AP]))
+                self.history_mean['coin'].append(np.average(now_state[self.COIN]))
+                self.history_mean['meow_prob'].append(np.average(now_state[self.STATUS] == self.STATUS_MEOW))
+                self.history_mean['has_crashed_prob'].append(np.average(now_state[self.HAS_CRASHED]))
             
-        return now_state, np.array(history)
+        return now_state
     
     def _handle_result(self, result):
-        result, history = result
         self.result_cl1_count = np.average(result[self.CL1_COUNT])
         self.logger.info(f'[模拟结果] 侵蚀1次数: {self.result_cl1_count}')
         self.result_meow_count = np.average(result[self.MEOW_COUNT])
@@ -438,61 +473,131 @@ class OSSimulator:
         self.logger.info(f'[模拟结果] 侵蚀一总时长 (h): {self.result_cl1_total_time / 3600}')
         self.result_meow_total_time = self.result_meow_count * self.meow_time
         self.logger.info(f'[模拟结果] 短猫总时长 (h): {self.result_meow_total_time / 3600}')
+        self.result_ap = np.average(result[self.AP])
+        self.logger.info(f'[模拟结果] 最终行动力: {self.result_ap}')
+        self.result_coin = np.average(result[self.COIN])
+        self.logger.info(f'[模拟结果] 最终黄币: {self.result_coin}')
+        # 获取样本总数，防止请求的 5 个超出范围
+        n_samples = result.shape[1]
+        top_k = min(5, n_samples)
+        
+        # 找到 AP 最低的 5 个索引
+        # np.argsort 默认升序，即前 5 个是最小的
+        bottom_indices = np.argsort(result[self.AP])[:top_k]
+        # 找到 AP 最高的 5 个索引
+        top_indices = np.argsort(result[self.AP])[-top_k:][::-1]
+        
+        self.logger.info(f'[模拟结果] 最差情况 (AP最低的前 {top_k} 个样本):')
+        for i, idx in enumerate(bottom_indices):
+            self.logger.info(f'  No.{i+1}: AP {result[self.AP][idx]:.1f}, Coin {result[self.COIN][idx]:.0f}')
+        
+        self.logger.info(f'[模拟结果] 最好情况 (AP最高的后 {top_k} 个样本):')
+        for i, idx in enumerate(top_indices):
+            self.logger.info(f'  No.{i+1}: AP {result[self.AP][idx]:.1f}, Coin {result[self.COIN][idx]:.0f}')
 
-        if self.deterministic:
-            self.result_ap = np.average(result[self.AP])
-            self.logger.info(f'[模拟结果] 最终行动力: {self.result_ap}')
-            self.result_coin = np.average(result[self.COIN])
-            self.logger.info(f'[模拟结果] 最终黄币: {self.result_coin}')
-        else:
-            # 获取样本总数，防止请求的 5 个超出范围
-            n_samples = result.shape[1]
-            top_k = min(5, n_samples)
-            
-            # 找到 AP 最低的 5 个索引
-            # np.argsort 默认升序，即前 5 个是最小的
-            bottom_indices = np.argsort(result[self.AP])[:top_k]
-            # 找到 AP 最高的 5 个索引
-            top_indices = np.argsort(result[self.AP])[-top_k:][::-1]
-            
-            self.logger.info(f'[模拟结果] 最差情况 (AP最低的前 {top_k} 个样本):')
-            for i, idx in enumerate(bottom_indices):
-                self.logger.info(f'  No.{i+1}: AP {result[self.AP][idx]:.1f}, Coin {result[self.COIN][idx]:.0f}')
-            
-            self.logger.info(f'[模拟结果] 最好情况 (AP最高的后 {top_k} 个样本):')
-            for i, idx in enumerate(top_indices):
-                self.logger.info(f'  No.{i+1}: AP {result[self.AP][idx]:.1f}, Coin {result[self.COIN][idx]:.0f}')
+        if self.draw_setting == 'single_sample':
+            self._plot_single_sample_history()
+        elif self.draw_setting == 'multi_sample':
+            self._plot_multi_sample_history()
 
-        # 绘制折线图
-        try:
-            import sys
-            import subprocess
-            import shlex
-            
-            if not self.deterministic:
-                self.logger.info("非确定性模式，跳过绘制折线图（平均值在概率模拟下无意义）")
-                return
+    def _plot_single_sample_history(self):
+        self.logger.info("正在生成单样本轨迹图...")
+        
+        fig, ax1 = plt.subplots(figsize=(18, 6))
+        
+        times = np.array(self.history_single['time']) / 86400
+        aps = self.history_single['ap']
+        coins = self.history_single['coin']
+        statuses = self.history_single['status']
 
-            # 计算所有样本的平均值
-            avg_history = np.mean(history, axis=2) # Shape: (Steps, 3)
-            # steps = np.arange(len(avg_history)) # 不再需要步数作为 X 轴
-            timestamps = avg_history[:, 2] # 获取时间戳作为 X 轴
+        ax1.plot(times, aps, color='blue', label='行动力', linewidth=1.5)
+        ax1.set_xlabel('时间 (天)')
+        ax1.set_ylabel('行动力', color='blue')
+        ax1.tick_params(axis='y', labelcolor='blue')
+
+        ax2 = ax1.twinx()
+        ax2.plot(times, coins, color='gold', label='黄币', linewidth=1.5)
+        ax2.set_ylabel('黄币', color='gold')
+        ax2.tick_params(axis='y', labelcolor='gold')
+
+        if len(times) > 1:
+            start_t = times[0]
+            current_s = statuses[1]
+            for i in range(1, len(times)):
+                if statuses[i] != current_s:
+                    end_t = times[i-1]
+                    if current_s == self.STATUS_CL1:
+                        ax1.axvspan(start_t, end_t, facecolor='green', alpha=0.15)
+                    elif current_s == self.STATUS_MEOW:
+                        ax1.axvspan(start_t, end_t, facecolor='orange', alpha=0.15)
+                    elif current_s == self.STATUS_CRASHED:
+                        ax1.axvspan(start_t, end_t, facecolor='red', alpha=0.15)
+                    start_t = end_t
+                    current_s = statuses[i]
             
-            os.makedirs('./log/oss', exist_ok=True)
-            timestamp_str = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            csv_path = os.path.abspath(f'./log/oss/{timestamp_str}.csv')
-            
-            # 保存到 CSV (每行: Timestamp, AP_Avg, Coin_Avg)
-            header = "Timestamp,AP,Coin"
-            csv_data = np.column_stack((timestamps, avg_history[:, 0], avg_history[:, 1]))
-            np.savetxt(csv_path, csv_data, delimiter=",", header=header, comments='')
-            
-            # 调用子脚本绘图 (异步)
-            python_exe = sys.executable
-            # 使用 shlex 序列化参数，虽然 Popen 列表形式本身相对安全，但增加审计清晰度
-            args = [python_exe, 'module/os/draw_os_plot.py', csv_path, str(self.coin_preserve), str(self.coin_threshold)]
-            subprocess.Popen(args)
-            
-            self.logger.info(f"数据已保存至 CSV，绘图子进程已启动: {csv_path}")
-        except Exception as e:
-            self.logger.error(f"保存或启动绘图失败: {e}")
+            if current_s == self.STATUS_CL1:
+                ax1.axvspan(start_t, times[-1], facecolor='green', alpha=0.15)
+            elif current_s == self.STATUS_MEOW:
+                ax1.axvspan(start_t, times[-1], facecolor='orange', alpha=0.15)
+            elif current_s == self.STATUS_CRASHED:
+                ax1.axvspan(start_t, times[-1], facecolor='red', alpha=0.15)
+                
+        cl1_patch = mpatches.Patch(color='green', alpha=0.15, label='侵蚀1')
+        meow_patch = mpatches.Patch(color='orange', alpha=0.15, label='短猫')
+        crash_patch = mpatches.Patch(color='red', alpha=0.15, label='坠机')
+        
+        lines1, labels1 = ax1.get_legend_handles_labels()
+        lines2, labels2 = ax2.get_legend_handles_labels()
+        ax1.legend(lines1 + lines2 + [cl1_patch, meow_patch, crash_patch], 
+                labels1 + labels2 + ['侵蚀1', '短猫', '坠机'], 
+                loc='upper left')
+
+        plt.title('大世界模拟器: 单样本轨迹图')
+        plt.tight_layout()
+        os.makedirs('./log/oss/figures', exist_ok=True)
+        self.result_figure_path = f'./log/oss/figures/{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_single_sample.png'
+        plt.savefig(self.result_figure_path)
+        self.logger.info(f"单样本图表已保存至: {self.result_figure_path}")
+        plt.close()
+
+    def _plot_multi_sample_history(self):
+        self.logger.info("正在生成多样本平均趋势图...")
+        
+        fig, ax1 = plt.subplots(figsize=(18, 6))
+
+        times = np.array(self.history_mean['time']) / 86400
+        aps = self.history_mean['ap']
+        coins = self.history_mean['coin']
+        meow_probs = self.history_mean['meow_prob']
+        crash_probs = self.history_mean['has_crashed_prob']
+
+        ax1.plot(times, aps, color='blue', label='平均行动力', linewidth=2)
+        ax1.set_xlabel('平均时间 (天)')
+        ax1.set_ylabel('行动力', color='blue')
+        ax1.tick_params(axis='y', labelcolor='blue')
+
+        ax2 = ax1.twinx()
+        ax2.plot(times, coins, color='gold', label='平均黄币', linewidth=2)
+        ax2.set_ylabel('黄币', color='gold')
+        ax2.tick_params(axis='y', labelcolor='gold')
+
+        ax3 = ax1.twinx()
+        ax3.spines['right'].set_position(('outward', 60))
+        ax3.plot(times, meow_probs, color='orange', linestyle='--', label='短猫概率', linewidth=1.5)
+        ax3.plot(times, crash_probs, color='red', linestyle='-.', label='坠过机概率', linewidth=1.5)
+        ax3.set_ylabel('概率', color='black')
+        ax3.tick_params(axis='y', labelcolor='black')
+        ax3.set_ylim(0, 1.05)
+
+        lines1, labels1 = ax1.get_legend_handles_labels()
+        lines2, labels2 = ax2.get_legend_handles_labels()
+        lines3, labels3 = ax3.get_legend_handles_labels()
+        ax1.legend(lines1 + lines2 + lines3, labels1 + labels2 + labels3, loc='upper left')
+
+        plt.title('大世界模拟器: 多样本平均趋势图')
+        plt.tight_layout()
+        os.makedirs('./log/oss/figures', exist_ok=True)
+        self.result_figure_path = f'./log/oss/figures/{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_multi_sample.png'
+        plt.savefig(self.result_figure_path)
+        self.logger.info(f"多样本图表已保存至: {self.result_figure_path}")
+        plt.close()

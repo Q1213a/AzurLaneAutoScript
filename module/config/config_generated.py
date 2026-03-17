@@ -791,10 +791,19 @@ class GeneratedConfig:
 
     # Group `OpsiSimulatorParameters`
     OpsiSimulatorParameters_Samples = 1000
+    OpsiSimulatorParameters_Draw = 'do_not'  # do_not, single_sample, multi_sample
     OpsiSimulatorParameters_TotalTime = 0
     OpsiSimulatorParameters_TimeUseRatio = 0.8
     OpsiSimulatorParameters_InitialAp = 0
     OpsiSimulatorParameters_InitialCoin = 0
+    OpsiSimulatorParameters_MeowHazardLevel = 'level5'  # level3, level5
+    OpsiSimulatorParameters_Cl1Coin = 170
+    OpsiSimulatorParameters_Meow3Coin = 750
+    OpsiSimulatorParameters_Meow5Coin = 1700
+    OpsiSimulatorParameters_AkashiProbability = 0.05
+    OpsiSimulatorParameters_Cl1Time = 0
+    OpsiSimulatorParameters_Meow3Time = 0
+    OpsiSimulatorParameters_Meow5Time = 0
 
     # Group `Storage`
     Storage_Storage = {}
