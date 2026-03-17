@@ -159,7 +159,7 @@ class AzurStats:
                 logger.warning(f'拉取数据失败, {e}')
                 return
 
-        stats = {h: {'combat_count': 0, 'items': {k: 0 for k in AzurStats.meowofficer_farming_map}} for h in range(1, 7)}
+        out_data = np.zeros((6, len(AzurStats.meowofficer_farming_labels)))
         img_combat_counts = {}
         
         for row in all_data:
@@ -171,31 +171,26 @@ class AzurStats:
             combat_count = row.get('combat_count', 0)
             if imgid not in img_combat_counts:
                 img_combat_counts[imgid] = combat_count
-                stats[h_level]['combat_count'] += combat_count
+                out_data[h_level - 1, 2] += combat_count
             
             item_name = row.get('item')
             amount = row.get('amount', 0)
             
-            if item_name in stats[h_level]['items']:
-                stats[h_level]['items'][item_name] += amount
-                
-        out_data = np.zeros((6, len(AzurStats.meowofficer_farming_labels)))
+            for i, item_prefix in enumerate(AzurStats.meowofficer_farming_map):
+                if item_name.startswith(item_prefix):
+                    out_data[h_level - 1, 3 + i] += amount
+                    break
         current_time = int(datetime.timestamp(datetime.now()))
         
         for i in range(6):
             h = i + 1
             out_data[i, 0] = h
             out_data[i, 1] = current_time
-            
-            total_combat = stats[h]['combat_count']
-            out_data[i, 2] = total_combat / AzurStats.unit_combat_count[h]
-            
-            for j, item in enumerate(AzurStats.meowofficer_farming_map):
-                total_amount = stats[h]['items'][item]
-                if total_combat > 0:
-                    out_data[i, 3 + j] = total_amount / out_data[i, 2]
-                else:
-                    out_data[i, 3 + j] = 0
+            out_data[i, 2] /= AzurStats.unit_combat_count[h]
+
+            if out_data[i, 2] > 0:
+                for j in range(3, len(AzurStats.meowofficer_farming_labels)):
+                    out_data[i, j] /= out_data[i, 2]
                     
         header = ','.join(AzurStats.meowofficer_farming_labels)
         np.savetxt('./log/azurstat_meowofficer_farming.csv', out_data, delimiter=',', header=header, comments='', fmt='%f', encoding='utf-8')
@@ -225,7 +220,7 @@ class AzurStats:
         Returns:
             bool: If success
         """
-        if genre not in ['opsi_hazard1_leveling', 'opsi_meowfficer_farming']:
+        if genre not in ['opsi_meowfficer_farming']:
             return False
         
         output = io.BytesIO()
