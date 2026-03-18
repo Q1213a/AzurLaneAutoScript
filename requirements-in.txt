@@ -1,4 +1,4 @@
-numpy<2.0
+numpy
 scipy
 pillow
 opencv-python>=4.8.0
@@ -27,7 +27,6 @@ onepush
 pydantic
 psutil
 chardet
-mxnet-alas
 matplotlib
 pycryptodome
 typing_extensions>=4.8.0
