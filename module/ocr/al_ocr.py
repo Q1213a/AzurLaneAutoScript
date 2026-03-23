@@ -16,6 +16,8 @@ class AlOcr:
         self.params = {}
         self.is_pdparams = False
         self._model_loaded = False
+        import os
+        logger.info(f"[VERBOSE] Created AlOcr instance: name='{self.name}', kwargs={kwargs}, PID={os.getpid()}")
         
     def _read_gpu_acceleration_setting(self) -> bool:
         """
@@ -40,9 +42,14 @@ class AlOcr:
         return True
 
     def init(self):
+        import time
+        import os
+        start_time = time.time()
+        logger.info(f"[VERBOSE] AlOcr.init() started for '{self.name}'. Process ID: {os.getpid()}")
         try:
-            logger.info('正在加载 OCR 模型...')
+            logger.info('[VERBOSE] 正在加载 OCR 模型...')
             from rapidocr import RapidOCR, OCRVersion
+            logger.info('[VERBOSE] 成功 load rapidocr: RapidOCR, OCRVersion')
         except Exception as e:
             logger.critical(f'Failed to load OCR dependencies: {e}')
             logger.critical(f'无法加载 OCR 依赖，如错误信息包含 DLL load failed while 请安装微软 C++ 运行库 https://aka.ms/vs/17/release/vc_redist.x64.exe')
@@ -72,6 +79,7 @@ class AlOcr:
             }
 
         use_gpu = self._read_gpu_acceleration_setting()
+        logger.info(f"[VERBOSE] GPU acceleration setting read: {use_gpu}")
         if use_gpu:
             self.params['EngineConfig.onnxruntime.use_dml'] = True
         else:
@@ -80,16 +88,19 @@ class AlOcr:
         # ----- Direct pdparams support for testing -----
         model_path = self.params.get("Rec.model_path", "")
         self.is_pdparams = model_path.endswith('.pdparams')
+        logger.info(f"[VERBOSE] Model path: {model_path}, is_pdparams: {self.is_pdparams}")
         if self.is_pdparams:
-            logger.info("Detected pdparams checkpoint. Preparing native PaddleOCR inference...")
+            logger.info("[VERBOSE] Detected pdparams checkpoint. Preparing native PaddleOCR inference...")
             import sys
             paddleocr_path = r"c:\Users\AzurLane\Desktop\Projects\AzurLaneAutoScript\PaddleOCR"
             if paddleocr_path not in sys.path:
                 sys.path.append(paddleocr_path)
             self._init_pdparams_model(model_path)
         else:
+            logger.info(f"[VERBOSE] Calling kwargs RapidOCR initialized with: {self.params}")
             self.model = RapidOCR(params=self.params)
             
+        logger.info(f"OCR model '{self.name}' Initialized. pdparams: {self.is_pdparams}, params: {self.params}, took: {time.time() - start_time:.4f}s")
         self._model_loaded = True
 
     def unload(self):
@@ -178,50 +189,107 @@ class AlOcr:
 
     def _infer_pdparams(self, img):
         import paddle
-        if len(img.shape) == 2:
-            img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-        tensor = paddle.to_tensor(self._preprocess_pdparams(img))
-        preds = self.model(tensor)
-        post_result = self.post_process_class(preds)
-        if post_result and post_result[0]:
-            return post_result[0][0]
-        return ""
+        import time
+        start_t = time.time()
+        logger.info(f"[VERBOSE] AlOcr._infer_pdparams: pdparams inferencing on image with shape {img.shape if hasattr(img, 'shape') else 'unknown'}, dtype: {img.dtype if hasattr(img, 'dtype') else 'unknown'}")
+        try:
+            if len(img.shape) == 2:
+                img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+            tensor_data = self._preprocess_pdparams(img)
+            logger.info(f"[VERBOSE] AlOcr._infer_pdparams: processed tensor_data shape {tensor_data.shape}, min {tensor_data.min()}, max {tensor_data.max()}")
+            tensor = paddle.to_tensor(tensor_data)
+            logger.info(f"[VERBOSE] AlOcr._infer_pdparams: Executing model(tensor)...")
+            preds = self.model(tensor)
+            logger.info(f"[VERBOSE] AlOcr._infer_pdparams: Model execution returned, passing to post_process_class...")
+            post_result = self.post_process_class(preds)
+            logger.info(f"[VERBOSE] AlOcr._infer_pdparams: post_result raw: {post_result}")
+            if post_result and post_result[0]:
+                res = post_result[0][0]
+                logger.info(f"[VERBOSE] AlOcr._infer_pdparams result: {res}, took: {time.time() - start_t:.4f}s")
+                return res
+            logger.info(f"[VERBOSE] AlOcr._infer_pdparams result: <empty>, took: {time.time() - start_t:.4f}s")
+            return ""
+        except Exception as e:
+            logger.error(f"[VERBOSE] AlOcr._infer_pdparams exception: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
+            return ""
 
     def ocr(self, img_fp):
+        import time
+        start_t = time.time()
+        logger.info(f"[VERBOSE] AlOcr.ocr: Ensure loaded...")
         self._ensure_loaded()
+        if hasattr(img_fp, 'shape'):
+            logger.info(f"AlOcr.ocr: inferencing on single image shape {img_fp.shape}, dtype {img_fp.dtype if hasattr(img_fp, 'dtype') else 'unknown'}")
+        else:
+            logger.info(f"AlOcr.ocr: inferencing on {type(img_fp)}")
+            
         if self.DEBUG and isinstance(img_fp, np.ndarray):
             os.makedirs('debug_ocr', exist_ok=True)
-            import time
-            cv2.imwrite(f'debug_ocr/{int(time.time() * 1000)}.png', img_fp)
+            debug_path = f'debug_ocr/{int(time.time() * 1000)}.png'
+            logger.info(f"[VERBOSE] AlOcr.ocr: Saving debug image to {debug_path}")
+            cv2.imwrite(debug_path, img_fp)
             
-        if self.is_pdparams:
-            return self._infer_pdparams(img_fp)
-        else:
-            res = self.model(img_fp)
-            if hasattr(res, 'txts') and res.txts:
-                return res.txts[0]
+        try:
+            if self.is_pdparams:
+                res = self._infer_pdparams(img_fp)
+                logger.info(f"[VERBOSE] AlOcr.ocr pdparams return: {res}")
+                return res
+            else:
+                logger.info("[VERBOSE] AlOcr.ocr: Calling RapidOCR model()...")
+                res = self.model(img_fp)
+                logger.debug(f"[VERBOSE] AlOcr.ocr: RapidOCR model() returned raw: {res}")
+                if hasattr(res, 'txts') and res.txts:
+                    logger.info(f"AlOcr.ocr result: {res.txts[0]}, took: {time.time() - start_t:.4f}s")
+                    return res.txts[0]
+                logger.info(f"AlOcr.ocr result: <empty>, took: {time.time() - start_t:.4f}s")
+                return ""
+        except Exception as e:
+            logger.error(f"[VERBOSE] AlOcr.ocr exception: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
             return ""
 
     def ocr_for_single_line(self, img_fp):
         return self.ocr(img_fp)
 
     def ocr_for_single_lines(self, img_list):
+        import time
+        start_t = time.time()
+        logger.info(f"[VERBOSE] AlOcr.ocr_for_single_lines: Ensure loaded...")
         self._ensure_loaded()
+        logger.info(f"AlOcr.ocr_for_single_lines: batch inferencing on {len(img_list)} images")
         results = []
-        for img in img_list:
+        for i, img in enumerate(img_list):
+            if hasattr(img, 'shape'):
+                logger.info(f"  [{i}/{len(img_list)}] image shape: {img.shape}, dtype: {img.dtype if hasattr(img, 'dtype') else 'unknown'}")
             if self.DEBUG and isinstance(img, np.ndarray):
                 os.makedirs('debug_ocr', exist_ok=True)
-                import time
-                cv2.imwrite(f'debug_ocr/{int(time.time() * 1000)}_{id(img)}.png', img)
+                debug_path = f'debug_ocr/{int(time.time() * 1000)}_{id(img)}.png'
+                logger.info(f"[VERBOSE] Saving batch debug image {i} to {debug_path}")
+                cv2.imwrite(debug_path, img)
             
-            if self.is_pdparams:
-                results.append(self._infer_pdparams(img))
-            else:
-                res = self.model(img)
-                if hasattr(res, 'txts') and res.txts:
-                    results.append(res.txts[0])
+            try:
+                if self.is_pdparams:
+                    logger.info(f"[VERBOSE]   [{i}/{len(img_list)}] Calling _infer_pdparams...")
+                    res = self._infer_pdparams(img)
+                    logger.debug(f"[VERBOSE]   [{i}/{len(img_list)}] _infer_pdparams raw output: {res}")
+                    results.append(res)
                 else:
-                    results.append("")
+                    logger.info(f"[VERBOSE]   [{i}/{len(img_list)}] Calling RapidOCR model()...")
+                    res = self.model(img)
+                    logger.debug(f"[VERBOSE]   [{i}/{len(img_list)}] RapidOCR raw result: {res}")
+                    if hasattr(res, 'txts') and res.txts:
+                        results.append(res.txts[0])
+                    else:
+                        results.append("")
+            except Exception as e:
+                logger.error(f"[VERBOSE] AlOcr.ocr_for_single_lines exception on image {i}: {e}")
+                import traceback
+                logger.error(traceback.format_exc())
+                results.append("")
+        logger.info(f"AlOcr.ocr_for_single_lines results: {results}, took: {time.time() - start_t:.4f}s")
         return results
 
     def set_cand_alphabet(self, cand_alphabet):
