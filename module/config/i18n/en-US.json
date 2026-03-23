@@ -595,11 +595,11 @@
     },
     "ScreenshotInterval": {
       "name": "Slow Down Screenshot Speed to X Seconds per Frame",
-      "help": "Minimum interval between two screenshots, limited to 0.1 ~ 0.3. Can reduce CPU usage on high-spec computers."
+      "help": "Minimum interval between two screenshots, limited to 0.001 ~ 0.3. Can reduce CPU usage on high-spec computers."
     },
     "CombatScreenshotInterval": {
       "name": "Slow Down Combat Screenshot Speed to X Seconds per Frame",
-      "help": "Minimum interval between two screenshots, limited to 0.3 ~ 1.0. Can reduce CPU usage during combat."
+      "help": "Minimum interval between two screenshots, limited to 0.001 ~ 1.0. Can reduce CPU usage during combat."
     },
     "TaskHoardingDuration": {
       "name": "Hoard Tasks for X Minutes",
