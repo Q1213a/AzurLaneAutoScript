@@ -284,6 +284,8 @@ class OSMap(OSFleet, Map, GlobeCamera, StorageHandler, StrategicSearchHandler):
                 self.ensure_no_zone_pinned()
                 return False
         self.zone_type_select(types=types)
+        # 点击太快碧蓝反应不过来
+        time.sleep(0.01)
         self.globe_enter(zone)
         # IN_MAP
         if hasattr(self, 'zone'):

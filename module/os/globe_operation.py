@@ -175,6 +175,8 @@ class GlobeOperation(ActionPointHandler):
         """
         self.ui_click(ZONE_SWITCH, appear_button=self.is_zone_pinned, check_button=self.is_in_zone_select,
                       skip_first_screenshot=True)
+        # 点击太快碧蓝反应不过来
+        time.sleep(0.015)
 
     def zone_select_execute(self, button):
         """
