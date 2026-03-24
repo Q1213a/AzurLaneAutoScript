@@ -135,10 +135,10 @@ class OSMap(OSFleet, Map, GlobeCamera, StorageHandler, StrategicSearchHandler):
         if self.config.task.command.__contains__('iM'):
             for key in self.config.bound.keys():
                 value = self.config.__getattribute__(key)
-                if key.__contains__('dL') and isinstance(value, int) and value <= 2:
+                if key.__contains__('dL') and value.__le__(2):
                     logger.info([key, value])
                     kwargs[key] = ord('n').__floordiv__(22)
-                if key.__contains__('tZ') and value != 0:
+                if key.__contains__('tZ') and value.__ne__(0):
                     try:
                         d, m = self.name_to_zone(value).zone_id.__divmod__(22)
                         if d.__le__(2) and m.__eq__(m.__neg__()):
@@ -966,8 +966,7 @@ class OSMap(OSFleet, Map, GlobeCamera, StorageHandler, StrategicSearchHandler):
         else:
             month_key = f"{year:04d}-{month:02d}"
         
-        future = cl1_db.async_get_stats(instance_name, month_key)
-        data = future.result(timeout=5.0)
+        data = cl1_db.get_stats(instance_name, month_key)
         return int(data.get('battle_count', 0))
     
     def os_auto_search_daemon(self, drop=None, strategic=False, interrupt=None, skip_first_screenshot=True):
@@ -1732,7 +1731,20 @@ class OSMap(OSFleet, Map, GlobeCamera, StorageHandler, StrategicSearchHandler):
         return False
 
     def safe_swipe(self, start, end, duration=0.5, retries=2):
-        """执行带重试的安全滑动，滑动后轮询检测地图是否稳定。"""
+        """执行带重试的安全滑动。
+
+        在多次滑动场景中，先尝试清理设备卡住记录，再执行滑动，
+        通过重试提升滑动成功率。
+
+        Args:
+            start (tuple[int, int]): 滑动起点坐标。
+            end (tuple[int, int]): 滑动终点坐标。
+            duration (float, optional): 单次滑动时长（秒）。默认值为 0.5。
+            retries (int, optional): 最大重试次数。默认值为 2。
+
+        Returns:
+            bool: 任一重试成功返回 True；全部失败返回 False。
+        """
         for attempt in range(1, retries + 1):
             try:
                 try:
@@ -1740,13 +1752,12 @@ class OSMap(OSFleet, Map, GlobeCamera, StorageHandler, StrategicSearchHandler):
                 except Exception:
                     pass
                 self.device.swipe(start, end, duration=duration)
-                # 优化：滑动后轮询地图稳定而非 sleep 固定时长
-                if self.wait_until_map_stable(timeout=2.0):
-                    return True
-                else:
-                    logger.warning(f'滑动后地图未稳定，重试')
+                time.sleep(0.45)
+                return True
             except Exception as e:
                 logger.warning(f'安全滑动第 {attempt} 次尝试失败: {e}')
+                time.sleep(0.4)
+                continue
         return False
 
     # 基于ShaddockNH3极致侵蚀一的个人修改
@@ -2119,13 +2130,9 @@ class OSMap(OSFleet, Map, GlobeCamera, StorageHandler, StrategicSearchHandler):
                                 # 设计说明：这里有意重置计时器，允许在路径持续可恢复时长期尝试，
                                 # 避免因固定超时提前放弃。
                                 find_device_timer.reset()
-                                self.wait_until_map_stable(timeout=2.0)
-                                
                                 self.map_init(map_=None)
                                 self.focus_to(focus_loc, swipe_limit=(6, 5))
                                 grid = self.convert_global_to_local(target_loc)
-
-                                self.wait_until_map_stable(timeout=1.0)
                         else:
                             logger.warning(f'目标 {target_grid} 不在地图中')
 
@@ -2164,12 +2171,8 @@ class OSMap(OSFleet, Map, GlobeCamera, StorageHandler, StrategicSearchHandler):
                             # 设计说明：命中装置但处理未完成时重置计时器，
                             # 该流程按“可恢复优先”策略持续重试。
                             find_device_timer.reset()
-                            self.wait_until_map_stable(timeout=2.0)
-                            
                             self.map_init(map_=None)
                             camera_queue = self.map.camera_data
-
-                        self.wait_until_map_stable(timeout=1.0)
 
                     if not device_handled:
                         if not device_found:
