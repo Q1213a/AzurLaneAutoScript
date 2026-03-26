@@ -1119,7 +1119,7 @@ def extract_white_letters(image, threshold=128):
 
 
 
-def crop_to_text_width(image, threshold=200, padding=2):
+def crop_to_text_width(image, threshold=120, padding=2):
     """Crop image width to tightly fit text content, keeping full height.
 
     Designed for OCR-preprocessed grayscale images (output of extract_letters),
@@ -1132,7 +1132,7 @@ def crop_to_text_width(image, threshold=200, padding=2):
         image (np.ndarray): Grayscale image, shape (height, width).
             Pixel values should be 0~255, where lower values indicate text.
         threshold (int): Pixels with value < threshold are considered text.
-            Default 200 to safely capture anti-aliased edges.
+            Default 120 to safely capture anti-aliased edges.
         padding (int): Extra pixels to keep on each side as safety margin.
             Default 2. Increase if text appears clipped.
 
