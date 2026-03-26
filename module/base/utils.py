@@ -1090,6 +1090,21 @@ def extract_letters(image, letter=(255, 255, 255), threshold=128):
     return positive
 
 
+def image_sharpen(image):
+    """
+    Sharpen the image to improve OCR accuracy.
+    Uses a standard 3x3 sharpening kernel.
+
+    Args:
+        image (np.ndarray): Shape (height, width) or (height, width, channel)
+
+    Returns:
+        np.ndarray:
+    """
+    kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
+    return cv2.filter2D(image, -1, kernel)
+
+
 def extract_white_letters(image, threshold=128):
     """Set letter color to black, set background color to white.
     This function will discourage color pixels (Non-gray pixels)
@@ -1121,14 +1136,13 @@ def extract_white_letters(image, threshold=128):
 
 
 
-def crop_to_text_width(image, threshold=120, padding=2):
-    """Crop image width to tightly fit text content, keeping full height.
+def crop_to_text(image, threshold=120, padding=2):
+    """Crop image width and height to tightly fit text content.
 
     Designed for OCR-preprocessed grayscale images (output of extract_letters),
     where text pixels have low values and background pixels are 255.
-    Finds the leftmost and rightmost columns that contain text, then crops
-    the image to that range with a small safety padding to ensure no text
-    is ever cut off.
+    Finds the leftmost, rightmost, topmost and bottommost rows/columns that contain text,
+    then crops the image to that range with a small safety padding.
 
     Args:
         image (np.ndarray): Grayscale image, shape (height, width).
@@ -1139,25 +1153,34 @@ def crop_to_text_width(image, threshold=120, padding=2):
             Default 2. Increase if text appears clipped.
 
     Returns:
-        np.ndarray: Width-cropped image with the same height.
+        np.ndarray: Cropped image.
             Returns the original image if no text is detected.
     """
     h, w = image.shape[:2]
 
     # Column-wise minimum: each column's darkest pixel
     col_min = np.min(image, axis=0)
+    # Row-wise minimum: each row's darkest pixel
+    row_min = np.min(image, axis=1)
+
     # Flatten to 1D if image has extra dimensions
     if col_min.ndim > 1:
         col_min = np.min(col_min, axis=-1)
+    if row_min.ndim > 1:
+        row_min = np.min(row_min, axis=-1)
 
     text_cols = np.where(col_min < threshold)[0]
-    if len(text_cols) == 0:
+    text_rows = np.where(row_min < threshold)[0]
+
+    if len(text_cols) == 0 or len(text_rows) == 0:
         return image
 
     left = max(text_cols[0] - padding, 0)
     right = min(text_cols[-1] + padding + 1, w)
+    top = max(text_rows[0] - padding, 0)
+    bottom = min(text_rows[-1] + padding + 1, h)
 
-    return image[:, left:right]
+    return image[top:bottom, left:right]
 
 
 def color_mapping(image, max_multiply=2):
